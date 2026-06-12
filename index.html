@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>多語言離線翻譯器 · 旅遊常用句 + 語音</title>
+    <title>多語言翻譯助手 · 三語下拉＋語音＋手打</title>
     <style>
         * {
             box-sizing: border-box;
@@ -17,12 +17,12 @@
             padding: 20px;
         }
         .app-container {
-            max-width: 950px;
+            max-width: 1050px;
             margin: 0 auto;
         }
         .card {
             background: white;
-            border-radius: 32px;
+            border-radius: 36px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.08);
             overflow: hidden;
             margin-bottom: 20px;
@@ -44,6 +44,56 @@
         }
         .content {
             padding: 24px 28px;
+        }
+        /* 三語下拉專區 */
+        .triple-dropdown-area {
+            background: #f8fafc;
+            border-radius: 28px;
+            padding: 18px 20px;
+            margin-bottom: 28px;
+            border: 1px solid #e2edf2;
+        }
+        .triple-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+            color: #0f2b3f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dropdown-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .dropdown-item {
+            flex: 1;
+            min-width: 180px;
+        }
+        .dropdown-item label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1e3a5f;
+            letter-spacing: 0.5px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 44px;
+            font-size: 0.85rem;
+            background: white;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 3px rgba(30,58,95,0.15);
         }
         .mode-selector {
             display: flex;
@@ -147,43 +197,6 @@
         .translate-btn {
             background: #1e3a5f;
         }
-        .travel-section {
-            background: #fefce8;
-            border-radius: 24px;
-            padding: 18px;
-            margin-top: 20px;
-            border: 1px solid #e2e8f0;
-        }
-        .travel-title {
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-        }
-        .travel-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            max-height: 220px;
-            overflow-y: auto;
-            padding: 4px 2px;
-        }
-        .travel-chip {
-            background: white;
-            border-radius: 40px;
-            padding: 6px 16px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            border: 1px solid #cbd5e1;
-            transition: all 0.1s;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .travel-chip:hover {
-            background: #e6f0ff;
-            border-color: #1e3a5f;
-        }
         .custom-section {
             background: #f8fafc;
             border-radius: 24px;
@@ -243,9 +256,14 @@
             font-size: 0.75rem;
             color: #2c6e2f;
         }
-        @media (max-width: 550px) {
+        @media (max-width: 680px) {
+            .dropdown-row { flex-direction: column; gap: 12px; }
             .content { padding: 18px; }
             .header h1 { font-size: 1.4rem; }
+        }
+        hr {
+            margin: 10px 0;
+            border-color: #e2edf2;
         }
     </style>
 </head>
@@ -253,19 +271,47 @@
 <div class="app-container">
     <div class="card">
         <div class="header">
-            <h1>🌏 多語言翻譯器 · 旅遊達人</h1>
-            <p>中英｜中日｜中韓 + 旅遊常用句 + 語音輸入/朗讀 (離線詞庫)</p>
+            <h1>🌏 三語翻譯器 · 下拉＋語音＋手打</h1>
+            <p>中英｜中日｜中韓獨立下拉選單 | 打字篩選 | 選取即填中外文 | 旅遊常用詞庫</p>
         </div>
         <div class="content">
-            <!-- 模式切換 -->
+            <!-- ★ 新增：三個獨立下拉式選單 (中英/中日/中韓) ★ -->
+            <div class="triple-dropdown-area">
+                <div class="triple-title">
+                    📋 各語言常用句下拉選單 <span style="font-size:0.7rem;">(可輸入一個字即時篩選)</span>
+                </div>
+                <div class="dropdown-row">
+                    <!-- 中英下拉 -->
+                    <div class="dropdown-item">
+                        <label>🇬🇧 中英詞庫 (EN)</label>
+                        <input type="text" id="enDropdownInput" class="search-input" placeholder="點選或輸入中文..." list="enDatalist" autocomplete="off">
+                        <datalist id="enDatalist"></datalist>
+                    </div>
+                    <!-- 中日下拉 -->
+                    <div class="dropdown-item">
+                        <label>🇯🇵 中日詞庫 (日本語)</label>
+                        <input type="text" id="jaDropdownInput" class="search-input" placeholder="點選或輸入中文..." list="jaDatalist" autocomplete="off">
+                        <datalist id="jaDatalist"></datalist>
+                    </div>
+                    <!-- 中韓下拉 -->
+                    <div class="dropdown-item">
+                        <label>🇰🇷 中韓詞庫 (한국어)</label>
+                        <input type="text" id="koDropdownInput" class="search-input" placeholder="點選或輸入中文..." list="koDatalist" autocomplete="off">
+                        <datalist id="koDatalist"></datalist>
+                    </div>
+                </div>
+                <div style="font-size:0.7rem; margin-top: 12px; color:#4a627a;">💡 任選下拉 -> 自動填入中文 + 即時翻譯對應外文 (模式自動切換)</div>
+            </div>
+
+            <!-- 模式切換 (保留原功能，但下拉會同步更新) -->
             <div class="mode-selector" id="modeSelector">
-                <button data-mode="general" class="mode-btn active">📖 一般翻譯 (中↔英)</button>
-                <button data-mode="japanese" class="mode-btn">🗾 旅遊日語 (中⇄日)</button>
-                <button data-mode="korean" class="mode-btn">🇰🇷 旅遊韓語 (中⇄韓)</button>
+                <button data-mode="general" class="mode-btn active">📖 中英模式</button>
+                <button data-mode="japanese" class="mode-btn">🗾 日語模式</button>
+                <button data-mode="korean" class="mode-btn">🇰🇷 韓語模式</button>
             </div>
 
             <div class="input-group">
-                <label>✏️ 輸入詞彙 / 句子</label>
+                <label>✏️ 手打 / 語音輸入區</label>
                 <textarea id="inputText" rows="2" placeholder="例如： 謝謝 / 你好 / 多少錢 / 我想去車站 / こんにちは"></textarea>
                 <div class="button-group">
                     <button id="clearBtn">清空</button>
@@ -284,12 +330,6 @@
                 </div>
             </div>
 
-            <!-- 旅遊常用句區域 (動態更新) -->
-            <div class="travel-section" id="travelSection">
-                <div class="travel-title">✈️ 旅遊常用句 · 點擊即填</div>
-                <div class="travel-grid" id="travelPhrasesList">📖 載入中...</div>
-            </div>
-
             <!-- 自訂詞彙 (依當前模式獨立儲存) -->
             <div class="custom-section">
                 <h4>📝 自訂詞彙 (針對目前語言模式，永久保存)</h4>
@@ -305,10 +345,10 @@
             </div>
             <div class="note">
                 💡 支援中/英/日/韓句子自動匹配 (最長匹配)。<br>
-                🗂️ 詞庫從外部 JSON 載入 (data/ 目錄)，旅遊句子獨立顯示。<br>
-                🔊 點擊「朗讀」即可聽取翻譯結果 (支援日語/韓語/中文/英語發音)。<br>
-                🎤 語音輸入支援中文 (國語)，按停止可中斷辨識。<br>
-                🔍 若自動翻譯未觸發，請點「翻譯」按鈕手動執行。
+                🗂️ 詞庫從外部 JSON 載入 (data/ 目錄)，下拉內容自動抓取第一欄(中文)順序排列。<br>
+                🔊 點擊「朗讀」即可聽取翻譯結果 (自動識別語言)。<br>
+                🎤 語音輸入支援中文，按停止可中斷辨識。<br>
+                🔽 三個下拉選單皆可「輸入一個字」快速篩選，選取後自動填寫中文並顯示對應外文翻譯。
             </div>
         </div>
     </div>
