@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>多語言翻譯助手 · 三語下拉+語音</title>
+    <title>多語言翻譯助手 · 智能下拉+語音</title>
     <style>
         * {
             box-sizing: border-box;
@@ -15,7 +15,7 @@
             background: #eef2f7;
             margin: 0;
             min-height: 100vh;
-            padding: 8px;
+            padding: 6px;
         }
         .app-container {
             max-width: 700px;
@@ -30,66 +30,60 @@
         }
         .header {
             background: #1e3a5f;
-            padding: 12px 16px;
+            padding: 10px 14px;
             color: white;
         }
         .header h1 {
             margin: 0 0 2px 0;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            letter-spacing: -0.2px;
         }
         .header p {
             margin: 0;
+            font-size: 0.6rem;
             opacity: 0.85;
-            font-size: 0.65rem;
-            font-weight: 500;
         }
         .content {
-            padding: 12px 14px;
+            padding: 10px 12px;
         }
-        /* 三語下拉專區 - 手機極致縮小版 */
+        /* 三語下拉專區 - 極致緊湊 */
         .triple-dropdown-area {
             background: #f8fafc;
             border-radius: 20px;
-            padding: 8px 10px;
-            margin-bottom: 16px;
+            padding: 6px 8px;
+            margin-bottom: 14px;
             border: 1px solid #e2edf2;
         }
         .triple-title {
             font-weight: 700;
             font-size: 0.7rem;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             color: #0f2b3f;
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
         .dropdown-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
         .dropdown-item {
             flex: 1;
-            min-width: 130px;
+            min-width: 110px;
         }
         .dropdown-item label {
             display: block;
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             font-weight: 700;
             margin-bottom: 2px;
             color: #1e3a5f;
         }
         .search-input {
             width: 100%;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border: 1.5px solid #cbd5e1;
             border-radius: 30px;
             font-size: 0.7rem;
             background: white;
             font-weight: 500;
-            font-family: inherit;
         }
         .search-input:focus {
             outline: none;
@@ -98,150 +92,148 @@
         }
         .mode-selector {
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 14px;
+            gap: 5px;
+            margin-bottom: 12px;
             background: #f8fafc;
-            padding: 6px 10px;
+            padding: 5px 8px;
             border-radius: 40px;
             justify-content: center;
         }
         .mode-btn {
             background: transparent;
             border: none;
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 40px;
             font-weight: 600;
             font-size: 0.7rem;
             cursor: pointer;
-            transition: 0.2s;
             color: #334155;
         }
         .mode-btn.active {
             background: #1e3a5f;
             color: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .input-group {
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         label {
             font-weight: 700;
+            font-size: 0.7rem;
+            margin-bottom: 3px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-            color: #1e293b;
-            font-size: 0.75rem;
         }
         textarea {
             width: 100%;
-            padding: 8px 12px;
+            padding: 6px 10px;
             font-size: 0.8rem;
             border: 2px solid #cbd5e1;
-            border-radius: 18px;
+            border-radius: 16px;
             font-family: inherit;
             font-weight: 500;
             resize: vertical;
             background: #fefefe;
         }
+        /* 軟性下拉建議區 */
+        .suggestions-container {
+            background: #ffffff;
+            border-radius: 14px;
+            margin-top: 6px;
+            border: 1px solid #e2e8f0;
+            max-height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 6px 8px;
+        }
+        .suggestion-chip {
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid #cbd5e1;
+        }
+        .suggestion-chip:active {
+            background: #e2e8f0;
+            transform: scale(0.96);
+        }
         .button-group {
             display: flex;
-            gap: 8px;
-            margin-top: 8px;
+            gap: 6px;
+            margin-top: 6px;
             flex-wrap: wrap;
-            align-items: center;
         }
         .result-wrapper {
             background: #f1f5f9;
-            border-radius: 16px;
-            padding: 8px 12px;
+            border-radius: 14px;
+            padding: 6px 10px;
             border-left: 4px solid #1e3a5f;
-            margin-top: 6px;
+            margin-top: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 8px;
-            flex-wrap: wrap;
         }
         .result-box {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
-            white-space: pre-wrap;
             word-break: break-word;
             flex: 1;
         }
-        .speak-btn, .voice-btn, .stop-btn, .translate-btn, button {
+        button {
             background: #1e3a5f;
             border: none;
             padding: 5px 12px;
-            border-radius: 32px;
+            border-radius: 30px;
             color: white;
             font-weight: 600;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: 0.1s;
-            font-family: inherit;
-        }
-        .speak-btn {
-            background: #475569;
-        }
-        .voice-btn {
-            background: #2c6e2f;
-        }
-        .stop-btn {
-            background: #9a3412;
-        }
-        .translate-btn {
-            background: #1e3a5f;
-        }
-        button.small {
-            background: #475569;
-            padding: 4px 10px;
             font-size: 0.65rem;
+            cursor: pointer;
         }
-        button:active {
-            transform: scale(0.96);
-        }
+        .speak-btn { background: #475569; }
+        .voice-btn { background: #2c6e2f; }
+        .stop-btn { background: #9a3412; }
+        .translate-btn { background: #1e3a5f; }
+        button.small { background: #475569; padding: 3px 8px; font-size: 0.6rem; }
         .custom-section {
             background: #f8fafc;
-            border-radius: 18px;
-            padding: 10px 12px;
-            margin-top: 14px;
+            border-radius: 16px;
+            padding: 8px 10px;
+            margin-top: 12px;
             border: 1px solid #e2e8f0;
         }
         .custom-section h4 {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
+            margin: 0 0 6px 0;
             font-weight: 700;
-            margin: 0 0 8px 0;
         }
         .flex-row {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
-            align-items: center;
         }
         .flex-row input {
             flex: 1;
-            padding: 6px 10px;
+            padding: 5px 8px;
             border: 1px solid #cbd5e1;
             border-radius: 30px;
             font-size: 0.7rem;
-            font-weight: 500;
-            font-family: inherit;
         }
         .note {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             color: #475569;
             text-align: center;
-            margin-top: 14px;
+            margin-top: 10px;
+            padding-top: 8px;
             border-top: 1px solid #e2e8f0;
-            padding-top: 10px;
-            font-weight: 500;
         }
         .badge {
             background: #e6f0ff;
-            display: inline-block;
             padding: 2px 6px;
             border-radius: 20px;
             font-size: 0.6rem;
@@ -249,69 +241,13 @@
             color: #1e3a5f;
         }
         .voice-status {
-            margin-left: 6px;
-            font-size: 0.65rem;
-            font-weight: 500;
+            font-size: 0.6rem;
             color: #2c6e2f;
+            margin-left: 4px;
         }
-        /* 手機專屬：三個下拉選單強制變小，緊湊排列 */
         @media (max-width: 560px) {
-            body {
-                padding: 5px;
-            }
-            .content {
-                padding: 10px 12px;
-            }
-            .triple-dropdown-area {
-                padding: 6px 8px;
-            }
-            .dropdown-row {
-                gap: 6px;
-            }
-            .dropdown-item {
-                min-width: 100%;
-            }
-            .search-input {
-                padding: 5px 8px;
-                font-size: 0.7rem;
-            }
-            .dropdown-item label {
-                font-size: 0.6rem;
-            }
-            .mode-btn {
-                padding: 4px 10px;
-                font-size: 0.7rem;
-            }
-            .button-group {
-                gap: 6px;
-            }
-            .speak-btn, .voice-btn, .stop-btn, .translate-btn {
-                padding: 5px 10px;
-                font-size: 0.65rem;
-            }
-            .result-box {
-                font-size: 0.8rem;
-            }
-        }
-        /* 再針對非常小的螢幕（如折疊機或舊手機）進一步收緊 */
-        @media (max-width: 420px) {
-            .search-input {
-                padding: 4px 8px;
-                font-size: 0.65rem;
-            }
-            .triple-title {
-                font-size: 0.65rem;
-            }
-            .custom-section h4 {
-                font-size: 0.7rem;
-            }
-        }
-        /* 粗體強化 */
-        strong, b, .mode-btn, .triple-title, label, .badge, .custom-section h4 {
-            font-weight: 700;
-        }
-        input, textarea, .search-input {
-            font-weight: 500;
+            .dropdown-item { min-width: 100%; }
+            .suggestions-container { max-height: 130px; }
         }
     </style>
 </head>
@@ -320,45 +256,32 @@
     <div class="card">
         <div class="header">
             <h1>🌏 三語翻譯助手</h1>
-            <p>中英｜中日｜中韓獨立下拉 · 語音輸入 · 手打翻譯</p>
+            <p>中英｜中日｜中韓 · 語音+手打+軟性搜尋下拉</p>
         </div>
         <div class="content">
-            <!-- 三個獨立下拉選單 (手機極致縮小) -->
+            <!-- 三個獨立下拉選單 (極小) -->
             <div class="triple-dropdown-area">
-                <div class="triple-title">
-                    📋 各語言常用句下拉 <span style="font-size:0.6rem;">(打字篩選)</span>
-                </div>
+                <div class="triple-title">📋 獨立下拉選單 (打字篩選)</div>
                 <div class="dropdown-row">
-                    <div class="dropdown-item">
-                        <label>🇬🇧 中英</label>
-                        <input type="text" id="enDropdownInput" class="search-input" placeholder="點選或輸入中文..." list="enDatalist" autocomplete="off">
-                        <datalist id="enDatalist"></datalist>
-                    </div>
-                    <div class="dropdown-item">
-                        <label>🇯🇵 中日</label>
-                        <input type="text" id="jaDropdownInput" class="search-input" placeholder="點選或輸入中文..." list="jaDatalist" autocomplete="off">
-                        <datalist id="jaDatalist"></datalist>
-                    </div>
-                    <div class="dropdown-item">
-                        <label>🇰🇷 中韓</label>
-                        <input type="text" id="koDropdownInput" class="search-input" placeholder="點選或輸入中文..." list="koDatalist" autocomplete="off">
-                        <datalist id="koDatalist"></datalist>
-                    </div>
+                    <div class="dropdown-item"><label>🇬🇧 中英</label><input type="text" id="enDropdownInput" class="search-input" placeholder="點選或輸入..." list="enDatalist" autocomplete="off"><datalist id="enDatalist"></datalist></div>
+                    <div class="dropdown-item"><label>🇯🇵 中日</label><input type="text" id="jaDropdownInput" class="search-input" placeholder="點選或輸入..." list="jaDatalist" autocomplete="off"><datalist id="jaDatalist"></datalist></div>
+                    <div class="dropdown-item"><label>🇰🇷 中韓</label><input type="text" id="koDropdownInput" class="search-input" placeholder="點選或輸入..." list="koDatalist" autocomplete="off"><datalist id="koDatalist"></datalist></div>
                 </div>
-                <div style="font-size:0.6rem; margin-top: 5px; color:#4a627a;">✨ 選取後自動填寫中文並切換模式</div>
             </div>
 
-            <!-- 模式切換按鈕 -->
+            <!-- 模式切換 -->
             <div class="mode-selector" id="modeSelector">
                 <button data-mode="general" class="mode-btn active">📖 中英</button>
                 <button data-mode="japanese" class="mode-btn">🗾 日語</button>
                 <button data-mode="korean" class="mode-btn">🇰🇷 韓語</button>
             </div>
 
-            <!-- 輸入區域 -->
+            <!-- 手打 / 語音輸入區 + 軟性搜尋下拉 -->
             <div class="input-group">
-                <label>✏️ 手打 / 語音輸入區</label>
-                <textarea id="inputText" rows="2" placeholder="例如： 謝謝 / 你好 / 多少錢 / 我想去車站"></textarea>
+                <label>✏️ 手打 / 語音輸入區 <span class="badge">下方即時建議</span></label>
+                <textarea id="inputText" rows="2" placeholder="輸入中文，下方自動顯示匹配詞條..."></textarea>
+                <!-- 軟性搜尋建議區 (動態產生) -->
+                <div id="suggestionsPanel" class="suggestions-container" style="display: none;"></div>
                 <div class="button-group">
                     <button id="clearBtn">清空</button>
                     <button id="voiceInputBtn" class="voice-btn">🎤 語音輸入</button>
@@ -381,25 +304,25 @@
             <div class="custom-section">
                 <h4>📝 自訂詞彙 (目前語言模式專用)</h4>
                 <div class="flex-row">
-                    <input type="text" id="newWord" placeholder="原文 (單字/短語)">
+                    <input type="text" id="newWord" placeholder="原文">
                     <input type="text" id="newTrans" placeholder="翻譯">
                     <button id="addWordBtn">➕ 新增</button>
                 </div>
-                <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;">
+                <div style="margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap;">
                     <button id="resetCustomBtn" class="small">🗑️ 清除當前自訂詞</button>
-                    <span class="badge">各模式獨立</span>
+                    <span class="badge">各模式獨立儲存</span>
                 </div>
             </div>
             <div class="note">
-                💡 支援中/英/日/韓句子匹配 | 下拉內容自動排序 | 手機適用<br>
-                🎤 語音輸入中文 (允許麥克風) | 🔽 輸入一個字即可過濾下拉選項
+                💡 軟性搜尋：在輸入區打字 → 下方自動顯示匹配的中文常用句 → 點擊即填入並翻譯<br>
+                🎤 語音輸入支援中文 | 🔽 三個獨立下拉亦可快速選取
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ----------------------------- 全域變數 -----------------------------
+    // ----------------------------- 全域 -----------------------------
     let currentMode = 'general';
     let dictGeneral = { dual: {} };
     let dictJapanese = { dual: {} };
@@ -417,6 +340,7 @@
     let isRecognizing = false;
     let isLoading = true;
     
+    // DOM
     const inputTextarea = document.getElementById('inputText');
     const outputDiv = document.getElementById('outputText');
     const clearBtn = document.getElementById('clearBtn');
@@ -429,6 +353,7 @@
     const voiceStatusSpan = document.getElementById('voiceStatus');
     const modeBtns = document.querySelectorAll('.mode-btn');
     const langHintSpan = document.getElementById('langHint');
+    const suggestionsPanel = document.getElementById('suggestionsPanel');
     
     const enDropdownInput = document.getElementById('enDropdownInput');
     const jaDropdownInput = document.getElementById('jaDropdownInput');
@@ -446,269 +371,313 @@
     }
     
     function getFallbackDict(langType) {
-        if (langType === 'en') {
-            return { "你好":"Hello","謝謝":"Thank you","對不起":"Sorry","多少錢":"How much","廁所在哪裡":"Where is the restroom","我來自台灣":"I'm from Taiwan","很好吃":"Delicious","再見":"Goodbye","飯店":"Hotel","車站":"Station" };
-        } else if (langType === 'ja') {
-            return { "你好":"こんにちは","謝謝":"ありがとう","對不起":"すみません","多少錢":"いくらですか","廁所在哪裡":"トイレはどこですか","我來自台灣":"台湾から来ました","很好吃":"美味しいです","再見":"さようなら","飯店":"ホテル","車站":"駅" };
-        } else {
-            return { "你好":"안녕하세요","謝謝":"감사합니다","對不起":"죄송합니다","多少錢":"얼마예요","廁所在哪裡":"화장실이 어디에요","我來自台灣":"저는 대만에서 왔어요","很好吃":"맛있어요","再見":"안녕히 가세요","飯店":"호텔","車站":"역" };
-        }
+        if (langType === 'en') return { "你好":"Hello","謝謝":"Thank you","對不起":"Sorry","多少錢":"How much","廁所在哪裡":"Where is the restroom","我來自台灣":"I'm from Taiwan","很好吃":"Delicious","再見":"Goodbye","飯店":"Hotel","車站":"Station" };
+        if (langType === 'ja') return { "你好":"こんにちは","謝謝":"ありがとう","對不起":"すみません","多少錢":"いくらですか","廁所在哪裡":"トイレはどこですか","我來自台灣":"台湾から来ました","很好吃":"美味しいです","再見":"さようなら","飯店":"ホテル","車站":"駅" };
+        return { "你好":"안녕하세요","謝謝":"감사합니다","對不起":"죄송합니다","多少錢":"얼마예요","廁所在哪裡":"화장실이 어디에요","我來自台灣":"저는 대만에서 왔어요","很好吃":"맛있어요","再見":"안녕히 가세요","飯店":"호텔","車站":"역" };
     }
     
     async function loadJSON(url, fallbackObj) {
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error();
-            return await response.json();
-        } catch (err) {
-            console.warn(`載入 ${url} 失敗，使用內建詞庫`);
-            return fallbackObj;
-        }
+            const res = await fetch(url);
+            if (!res.ok) throw new Error();
+            return await res.json();
+        } catch { return fallbackObj; }
     }
     
     function buildDropdownOptions() {
-        const enKeys = Object.keys(dictGeneral.dual).sort((a,b) => a.localeCompare(b, 'zh'));
-        enDatalist.innerHTML = '';
-        enKeys.forEach(key => { const opt = document.createElement('option'); opt.value = key; enDatalist.appendChild(opt); });
-        const jaKeys = Object.keys(dictJapanese.dual).sort((a,b) => a.localeCompare(b, 'zh'));
-        jaDatalist.innerHTML = '';
-        jaKeys.forEach(key => { const opt = document.createElement('option'); opt.value = key; jaDatalist.appendChild(opt); });
-        const koKeys = Object.keys(dictKorean.dual).sort((a,b) => a.localeCompare(b, 'zh'));
-        koDatalist.innerHTML = '';
-        koKeys.forEach(key => { const opt = document.createElement('option'); opt.value = key; koDatalist.appendChild(opt); });
+        const enKeys = Object.keys(dictGeneral.dual).sort((a,b)=>a.localeCompare(b,'zh'));
+        enDatalist.innerHTML = ''; enKeys.forEach(k=>{let o=document.createElement('option'); o.value=k; enDatalist.appendChild(o);});
+        const jaKeys = Object.keys(dictJapanese.dual).sort((a,b)=>a.localeCompare(b,'zh'));
+        jaDatalist.innerHTML = ''; jaKeys.forEach(k=>{let o=document.createElement('option'); o.value=k; jaDatalist.appendChild(o);});
+        const koKeys = Object.keys(dictKorean.dual).sort((a,b)=>a.localeCompare(b,'zh'));
+        koDatalist.innerHTML = ''; koKeys.forEach(k=>{let o=document.createElement('option'); o.value=k; koDatalist.appendChild(o);});
     }
     
     async function loadAllDictionaries() {
-        const generalData = await loadJSON('data/zh_en_dual.json', getFallbackDict('en'));
-        dictGeneral.dual = generalData;
-        const japaneseData = await loadJSON('data/zh_ja_dual.json', getFallbackDict('ja'));
-        dictJapanese.dual = japaneseData;
-        const koreanData = await loadJSON('data/zh_ko_dual.json', getFallbackDict('ko'));
-        dictKorean.dual = koreanData;
-        
+        dictGeneral.dual = await loadJSON('data/zh_en_dual.json', getFallbackDict('en'));
+        dictJapanese.dual = await loadJSON('data/zh_ja_dual.json', getFallbackDict('ja'));
+        dictKorean.dual = await loadJSON('data/zh_ko_dual.json', getFallbackDict('ko'));
         loadCustomFromStorage();
         rebuildActiveMaps();
         buildDropdownOptions();
         isLoading = false;
-        if (inputTextarea.value.trim() !== "") performTranslation();
-        else outputDiv.innerHTML = "✨ 離線詞庫就緒，可點選下拉選單或手打翻譯";
+        if (inputTextarea.value.trim()) performTranslation();
+        else outputDiv.innerHTML = "✨ 就緒，可打字或點選下拉";
     }
     
     function loadCustomFromStorage() {
-        ['general', 'japanese', 'korean'].forEach(mode => {
+        ['general','japanese','korean'].forEach(mode=>{
             const stored = localStorage.getItem(`customDict_${mode}`);
-            if (stored) try { customDict[mode] = JSON.parse(stored); } catch(e) {}
-            else customDict[mode] = { forward: {}, backward: {} };
+            if(stored) try{ customDict[mode]=JSON.parse(stored); }catch(e){}
+            else customDict[mode]={ forward:{}, backward:{} };
         });
     }
     
-    function saveCurrentCustom() {
-        localStorage.setItem(`customDict_${currentMode}`, JSON.stringify(customDict[currentMode]));
-    }
+    function saveCurrentCustom() { localStorage.setItem(`customDict_${currentMode}`, JSON.stringify(customDict[currentMode])); }
     
     function rebuildActiveMaps() {
-        let baseForward = {}, baseBackward = {};
-        if (currentMode === 'general') {
-            baseForward = { ...dictGeneral.dual };
-            for (const [k, v] of Object.entries(baseForward)) baseBackward[v] = k;
-        } else if (currentMode === 'japanese') {
-            baseForward = { ...dictJapanese.dual };
-            for (const [k, v] of Object.entries(baseForward)) baseBackward[v] = k;
-        } else {
-            baseForward = { ...dictKorean.dual };
-            for (const [k, v] of Object.entries(baseForward)) baseBackward[v] = k;
-        }
-        const customF = customDict[currentMode].forward || {};
-        const customB = customDict[currentMode].backward || {};
-        activeForwardMap = { ...baseForward, ...customF };
-        activeBackwardMap = { ...baseBackward, ...customB };
-        for (const [src, tgt] of Object.entries(customF)) if (!activeBackwardMap[tgt]) activeBackwardMap[tgt] = src;
-        for (const [tgt, src] of Object.entries(customB)) if (!activeForwardMap[src]) activeForwardMap[src] = tgt;
-        let modeText = currentMode === 'general' ? '中英雙向' : (currentMode === 'japanese' ? '中日雙向' : '中韓雙向');
+        let baseForward={}, baseBackward={};
+        if(currentMode==='general') { baseForward={...dictGeneral.dual}; for(let [k,v] of Object.entries(baseForward)) baseBackward[v]=k; }
+        else if(currentMode==='japanese') { baseForward={...dictJapanese.dual}; for(let [k,v] of Object.entries(baseForward)) baseBackward[v]=k; }
+        else { baseForward={...dictKorean.dual}; for(let [k,v] of Object.entries(baseForward)) baseBackward[v]=k; }
+        const cf = customDict[currentMode].forward || {};
+        const cb = customDict[currentMode].backward || {};
+        activeForwardMap = { ...baseForward, ...cf };
+        activeBackwardMap = { ...baseBackward, ...cb };
+        for(let [src,tgt] of Object.entries(cf)) if(!activeBackwardMap[tgt]) activeBackwardMap[tgt]=src;
+        for(let [tgt,src] of Object.entries(cb)) if(!activeForwardMap[src]) activeForwardMap[src]=tgt;
+        const modeText = currentMode==='general'?'中英雙向':(currentMode==='japanese'?'中日雙向':'中韓雙向');
         langHintSpan.innerText = `模式: ${modeText}`;
     }
     
     function translateWithLongestMatch(rawText, forwardMap, backwardMap) {
         let cleaned = cleanText(rawText);
-        if (cleaned === "") return "";
-        let lowerInput = cleaned.toLowerCase();
-        if (forwardMap[lowerInput]) return forwardMap[lowerInput];
-        if (backwardMap[lowerInput]) return backwardMap[lowerInput];
-        const words = cleaned.split(/\s+/);
-        if (words.length === 1) {
-            const single = words[0].toLowerCase();
-            if (forwardMap[single]) return forwardMap[single];
-            if (backwardMap[single]) return backwardMap[single];
-            return "⚠️ 未收錄此詞彙，可點擊「新增自訂詞」";
+        if(!cleaned) return "";
+        let lower = cleaned.toLowerCase();
+        if(forwardMap[lower]) return forwardMap[lower];
+        if(backwardMap[lower]) return backwardMap[lower];
+        let words = cleaned.split(/\s+/);
+        if(words.length===1){
+            let s=words[0].toLowerCase();
+            if(forwardMap[s]) return forwardMap[s];
+            if(backwardMap[s]) return backwardMap[s];
+            return "⚠️ 未收錄，可自訂";
         } else {
-            let translatedParts = [], unknown = 0;
-            for (let w of words) {
-                const lw = w.toLowerCase();
-                if (forwardMap[lw]) translatedParts.push(forwardMap[lw]);
-                else if (backwardMap[lw]) translatedParts.push(backwardMap[lw]);
-                else { translatedParts.push(w); unknown++; }
+            let parts=[], unknown=0;
+            for(let w of words){
+                let lw=w.toLowerCase();
+                if(forwardMap[lw]) parts.push(forwardMap[lw]);
+                else if(backwardMap[lw]) parts.push(backwardMap[lw]);
+                else { parts.push(w); unknown++; }
             }
-            if (unknown === words.length) return "⚠️ 無匹配詞彙，建議使用下拉選單或新增自訂詞";
-            return translatedParts.join(" ");
+            if(unknown===words.length) return "⚠️ 無匹配詞彙，試試下拉選單";
+            return parts.join(" ");
         }
     }
     
     function performTranslation() {
-        if (isLoading) { outputDiv.innerHTML = "⏳ 詞庫載入中..."; return; }
-        const rawText = inputTextarea.value;
-        if (!rawText.trim()) { outputDiv.innerHTML = "⚡ 輸入內容後自動翻譯..."; return; }
-        outputDiv.innerHTML = translateWithLongestMatch(rawText, activeForwardMap, activeBackwardMap);
+        if(isLoading) { outputDiv.innerHTML="⏳ 載入中..."; return; }
+        let raw = inputTextarea.value;
+        if(!raw.trim()) { outputDiv.innerHTML="⚡ 輸入內容後自動翻譯..."; return; }
+        outputDiv.innerHTML = translateWithLongestMatch(raw, activeForwardMap, activeBackwardMap);
     }
     
     function setMode(mode) {
-        if (currentMode === mode) return;
-        currentMode = mode;
-        modeBtns.forEach(btn => {
-            if (btn.getAttribute('data-mode') === mode) btn.classList.add('active');
+        if(currentMode===mode) return;
+        currentMode=mode;
+        modeBtns.forEach(btn=>{
+            if(btn.getAttribute('data-mode')===mode) btn.classList.add('active');
             else btn.classList.remove('active');
         });
         rebuildActiveMaps();
         performTranslation();
+        updateSuggestions(inputTextarea.value); // 刷新建議詞
     }
     
-    function speakText(text) {
-        if (!text || text.startsWith("⚠️") || text.startsWith("⚡")) return;
-        const utterance = new SpeechSynthesisUtterance(text);
-        const jaRegex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/;
-        const koRegex = /[\uAC00-\uD7AF\u1100-\u11FF]/;
-        const engRegex = /[a-zA-Z]/;
-        if (koRegex.test(text)) utterance.lang = 'ko-KR';
-        else if (jaRegex.test(text)) utterance.lang = 'ja-JP';
-        else if (engRegex.test(text) && !/[\u4e00-\u9fff]/.test(text)) utterance.lang = 'en-US';
-        else utterance.lang = 'zh-TW';
+    function speakText(text){
+        if(!text || text.startsWith("⚠️")||text.startsWith("⚡")) return;
+        let utterance = new SpeechSynthesisUtterance(text);
+        if(/[\uAC00-\uD7AF]/.test(text)) utterance.lang='ko-KR';
+        else if(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text)) utterance.lang='ja-JP';
+        else if(/[a-zA-Z]/.test(text) && !/[\u4e00-\u9fff]/.test(text)) utterance.lang='en-US';
+        else utterance.lang='zh-TW';
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(utterance);
     }
     
-    function addCustomWord() {
-        const source = document.getElementById('newWord').value.trim();
-        const target = document.getElementById('newTrans').value.trim();
-        if (!source || !target) { alert("請填寫原文和翻譯"); return; }
-        const modeCust = customDict[currentMode];
-        modeCust.forward[source] = target;
-        modeCust.backward[target] = source;
-        saveCurrentCustom();
-        rebuildActiveMaps();
-        document.getElementById('newWord').value = '';
-        document.getElementById('newTrans').value = '';
-        alert(`✅ 已新增：${source} → ${target}`);
-        performTranslation();
+    // 軟性搜尋：根據輸入文字從 activeForwardMap 的 keys (中文) 中匹配
+    function updateSuggestions(query) {
+        if(!query || query.trim()===""){
+            suggestionsPanel.style.display = "none";
+            suggestionsPanel.innerHTML = "";
+            return;
+        }
+        const lowerQuery = query.trim().toLowerCase();
+        // 取得當前模式下所有中文詞條 (activeForwardMap 的 keys)
+        let allChinese = Object.keys(activeForwardMap);
+        // 過濾：包含輸入文字 (模糊匹配，不區分大小寫)
+        let matched = allChinese.filter(ch => ch.toLowerCase().includes(lowerQuery));
+        // 排序：優先開頭匹配，再按長度
+        matched.sort((a,b)=>{
+            let aStarts = a.toLowerCase().startsWith(lowerQuery);
+            let bStarts = b.toLowerCase().startsWith(lowerQuery);
+            if(aStarts && !bStarts) return -1;
+            if(!aStarts && bStarts) return 1;
+            return a.length - b.length;
+        });
+        let topMatches = matched.slice(0, 10);
+        if(topMatches.length === 0){
+            suggestionsPanel.style.display = "none";
+            suggestionsPanel.innerHTML = "";
+            return;
+        }
+        suggestionsPanel.style.display = "flex";
+        suggestionsPanel.innerHTML = "";
+        topMatches.forEach(term => {
+            let chip = document.createElement("div");
+            chip.className = "suggestion-chip";
+            chip.textContent = term;
+            chip.addEventListener("click", (e) => {
+                e.stopPropagation();
+                inputTextarea.value = term;
+                performTranslation();
+                updateSuggestions(term); // 更新建議列表（可選）
+                // 建議面板可以保留，但更好關閉後再打開？
+                setTimeout(()=>updateSuggestions(term),10);
+            });
+            suggestionsPanel.appendChild(chip);
+        });
     }
     
-    function resetCurrentCustom() {
-        if (confirm(`確定清除「${currentMode}」模式的所有自訂詞彙嗎？`)) {
-            customDict[currentMode] = { forward: {}, backward: {} };
-            saveCurrentCustom();
-            rebuildActiveMaps();
-            performTranslation();
-            alert("自訂詞彙已清除");
-        }
+    // 監聽輸入區
+    function onInputTextChange() {
+        const val = inputTextarea.value;
+        performTranslation();
+        updateSuggestions(val);
     }
     
     // 語音
     function initSpeechRecognition() {
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            voiceStatusSpan.innerText = '⚠️ 不支援語音';
-            if (voiceInputBtn) voiceInputBtn.disabled = true;
-            if (voiceStopBtn) voiceStopBtn.disabled = true;
+        if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+            voiceStatusSpan.innerText='⚠️ 不支援語音';
+            if(voiceInputBtn) voiceInputBtn.disabled=true;
+            if(voiceStopBtn) voiceStopBtn.disabled=true;
             return;
         }
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'zh-TW';
-        recognition.onstart = () => {
-            isRecognizing = true;
-            voiceStatusSpan.innerText = '🎙️ 聆聽中...';
-            if (voiceInputBtn) voiceInputBtn.style.opacity = '0.6';
-            if (voiceStopBtn) voiceStopBtn.disabled = false;
+        recognition.continuous=false;
+        recognition.interimResults=false;
+        recognition.lang='zh-TW';
+        recognition.onstart=()=>{
+            isRecognizing=true;
+            voiceStatusSpan.innerText='🎙️ 聆聽中...';
+            if(voiceInputBtn) voiceInputBtn.style.opacity='0.6';
+            if(voiceStopBtn) voiceStopBtn.disabled=false;
         };
-        recognition.onend = () => {
-            isRecognizing = false;
-            voiceStatusSpan.innerText = '';
-            if (voiceInputBtn) voiceInputBtn.style.opacity = '1';
-            if (voiceStopBtn) voiceStopBtn.disabled = true;
+        recognition.onend=()=>{
+            isRecognizing=false;
+            voiceStatusSpan.innerText='';
+            if(voiceInputBtn) voiceInputBtn.style.opacity='1';
+            if(voiceStopBtn) voiceStopBtn.disabled=true;
         };
-        recognition.onerror = (event) => {
-            let errMsg = event.error === 'not-allowed' ? '❌ 麥克風未允許' : (event.error === 'no-speech' ? '⏳ 沒聽到聲音' : `錯誤: ${event.error}`);
-            voiceStatusSpan.innerText = errMsg;
-            setTimeout(() => { if (voiceStatusSpan.innerText === errMsg) voiceStatusSpan.innerText = ''; }, 2000);
-            isRecognizing = false;
-            if (voiceInputBtn) voiceInputBtn.style.opacity = '1';
-            if (voiceStopBtn) voiceStopBtn.disabled = true;
+        recognition.onerror=(event)=>{
+            let err = event.error==='not-allowed'?'❌ 麥克風未允許':(event.error==='no-speech'?'⏳ 沒聽到聲音':`錯誤:${event.error}`);
+            voiceStatusSpan.innerText=err;
+            setTimeout(()=>{ if(voiceStatusSpan.innerText===err) voiceStatusSpan.innerText=''; },2000);
+            isRecognizing=false;
+            if(voiceInputBtn) voiceInputBtn.style.opacity='1';
+            if(voiceStopBtn) voiceStopBtn.disabled=true;
         };
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            if (transcript) {
-                inputTextarea.value = cleanText(transcript);
+        recognition.onresult=(event)=>{
+            let transcript = event.results[0][0].transcript;
+            if(transcript){
+                let cleaned = cleanText(transcript);
+                inputTextarea.value = cleaned;
                 performTranslation();
-                voiceStatusSpan.innerText = '✅ 完成';
-                setTimeout(() => { if (voiceStatusSpan.innerText === '✅ 完成') voiceStatusSpan.innerText = ''; }, 1500);
+                updateSuggestions(cleaned);
+                voiceStatusSpan.innerText='✅ 完成';
+                setTimeout(()=>{ if(voiceStatusSpan.innerText==='✅ 完成') voiceStatusSpan.innerText=''; },1500);
             }
             recognition.stop();
         };
     }
     
-    function startVoiceInput() {
-        if (!recognition) { alert("語音不支援"); return; }
-        if (isRecognizing) { recognition.stop(); setTimeout(() => { try { recognition.start(); } catch(e) {} }, 150); }
-        else { try { recognition.start(); } catch(e) { voiceStatusSpan.innerText = '請稍後重試'; } }
+    function startVoiceInput(){
+        if(!recognition){ alert("語音不支援"); return; }
+        if(isRecognizing){ recognition.stop(); setTimeout(()=>{ try{ recognition.start(); }catch(e){} },150); }
+        else{ try{ recognition.start(); }catch(e){ voiceStatusSpan.innerText='請稍後重試'; } }
     }
-    function stopVoiceInput() {
-        if (recognition && isRecognizing) { recognition.stop(); voiceStatusSpan.innerText = '⏹️ 已停止'; setTimeout(() => { if (voiceStatusSpan.innerText === '⏹️ 已停止') voiceStatusSpan.innerText = ''; }, 1200); }
-    }
-    
-    function setupDropdowns() {
-        enDropdownInput.addEventListener('change', function() {
-            const selected = this.value.trim();
-            if (selected && dictGeneral.dual[selected]) {
-                if (currentMode !== 'general') setMode('general');
-                inputTextarea.value = selected;
-                performTranslation();
-            }
-        });
-        jaDropdownInput.addEventListener('change', function() {
-            const selected = this.value.trim();
-            if (selected && dictJapanese.dual[selected]) {
-                if (currentMode !== 'japanese') setMode('japanese');
-                inputTextarea.value = selected;
-                performTranslation();
-            }
-        });
-        koDropdownInput.addEventListener('change', function() {
-            const selected = this.value.trim();
-            if (selected && dictKorean.dual[selected]) {
-                if (currentMode !== 'korean') setMode('korean');
-                inputTextarea.value = selected;
-                performTranslation();
-            }
-        });
+    function stopVoiceInput(){
+        if(recognition && isRecognizing){ recognition.stop(); voiceStatusSpan.innerText='⏹️ 已停止'; setTimeout(()=>{ if(voiceStatusSpan.innerText==='⏹️ 已停止') voiceStatusSpan.innerText=''; },1200); }
     }
     
-    document.addEventListener('DOMContentLoaded', async () => {
+    function addCustomWord(){
+        const src = document.getElementById('newWord').value.trim();
+        const tgt = document.getElementById('newTrans').value.trim();
+        if(!src || !tgt){ alert("請填寫原文和翻譯"); return; }
+        const modeCust = customDict[currentMode];
+        modeCust.forward[src]=tgt;
+        modeCust.backward[tgt]=src;
+        saveCurrentCustom();
+        rebuildActiveMaps();
+        document.getElementById('newWord').value='';
+        document.getElementById('newTrans').value='';
+        alert(`✅ 已新增：${src} → ${tgt}`);
+        performTranslation();
+        updateSuggestions(inputTextarea.value);
+    }
+    
+    function resetCurrentCustom(){
+        if(confirm(`清除「${currentMode}」所有自訂詞彙？`)){
+            customDict[currentMode]={ forward:{}, backward:{} };
+            saveCurrentCustom();
+            rebuildActiveMaps();
+            performTranslation();
+            updateSuggestions(inputTextarea.value);
+            alert("自訂詞已清除");
+        }
+    }
+    
+    function setupDropdowns(){
+        enDropdownInput.addEventListener('change', function(){
+            let val = this.value.trim();
+            if(val && dictGeneral.dual[val]){
+                if(currentMode!=='general') setMode('general');
+                inputTextarea.value = val;
+                performTranslation();
+                updateSuggestions(val);
+            }
+        });
+        jaDropdownInput.addEventListener('change', function(){
+            let val = this.value.trim();
+            if(val && dictJapanese.dual[val]){
+                if(currentMode!=='japanese') setMode('japanese');
+                inputTextarea.value = val;
+                performTranslation();
+                updateSuggestions(val);
+            }
+        });
+        koDropdownInput.addEventListener('change', function(){
+            let val = this.value.trim();
+            if(val && dictKorean.dual[val]){
+                if(currentMode!=='korean') setMode('korean');
+                inputTextarea.value = val;
+                performTranslation();
+                updateSuggestions(val);
+            }
+        });
+    }
+    
+    // 初始化
+    document.addEventListener('DOMContentLoaded', async ()=>{
         await loadAllDictionaries();
         setupDropdowns();
-        inputTextarea.addEventListener('input', performTranslation);
-        clearBtn.addEventListener('click', () => { inputTextarea.value = ''; outputDiv.innerHTML = "⚡ 輸入內容後自動翻譯..."; });
+        inputTextarea.addEventListener('input', onInputTextChange);
+        clearBtn.addEventListener('click', ()=>{
+            inputTextarea.value='';
+            performTranslation();
+            updateSuggestions('');
+        });
         addWordBtn.addEventListener('click', addCustomWord);
         resetCustomBtn.addEventListener('click', resetCurrentCustom);
-        speakResultBtn.addEventListener('click', () => {
-            const rt = outputDiv.innerText;
-            if (rt && !rt.includes("⚠️") && !rt.includes("⚡")) speakText(rt);
-            else alert("沒有可朗讀的翻譯結果");
+        speakResultBtn.addEventListener('click', ()=>{
+            let txt = outputDiv.innerText;
+            if(txt && !txt.includes("⚠️") && !txt.includes("⚡")) speakText(txt);
+            else alert("無有效翻譯結果");
         });
         translateBtn.addEventListener('click', performTranslation);
-        modeBtns.forEach(btn => btn.addEventListener('click', (e) => { const mode = btn.getAttribute('data-mode'); if (mode) setMode(mode); }));
+        modeBtns.forEach(btn=>{
+            btn.addEventListener('click', (e)=>{
+                let mode = btn.getAttribute('data-mode');
+                if(mode) setMode(mode);
+            });
+        });
         initSpeechRecognition();
-        if (voiceInputBtn) voiceInputBtn.addEventListener('click', startVoiceInput);
-        if (voiceStopBtn) voiceStopBtn.addEventListener('click', stopVoiceInput);
+        if(voiceInputBtn) voiceInputBtn.addEventListener('click', startVoiceInput);
+        if(voiceStopBtn) voiceStopBtn.addEventListener('click', stopVoiceInput);
         performTranslation();
+        updateSuggestions('');
     });
 </script>
 </body>
