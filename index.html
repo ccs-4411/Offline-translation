@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>對話式雙向翻譯助手 · 即時語音版</title>
+    <title>對話式雙向翻譯助手 · 智慧對照版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -186,14 +186,14 @@
     <div class="card">
         <div class="header">
             <h1>💬 對話式雙向隨身翻譯</h1>
-            <p>即時雙向選單 · 辨識完畢自動發聲朗讀</p>
+            <p>外文輸入直接顯示中文 · 雙向智慧語音播放</p>
         </div>
         <div class="content">
 
             <div class="mode-selector" id="modeSelector">
-                <button data-mode="general" class="mode-btn active">🇺🇸 中英對話 (聽英文/中文)</button>
-                <button data-mode="japanese" class="mode-btn">🗾 中日對話 (聽日文/中文)</button>
-                <button data-mode="korean" class="mode-btn">🇰🇷 中韓對話 (聽韓文/中文)</button>
+                <button data-mode="general" class="mode-btn active">🇺🇸 中英對話</button>
+                <button data-mode="japanese" class="mode-btn">🗾 中日對話</button>
+                <button data-mode="korean" class="mode-btn">🇰🇷 中韓對話</button>
             </div>
 
             <div class="input-group">
@@ -233,7 +233,7 @@
                 </div>
             </div>
             <div class="note">
-                💡 <b>優化提示</b>：選單已全數改為「外文在前 ➔ 中文在後」方便對照與外國人選取。選定後系統會<b>自動播放聲音</b>。
+                💡 <b>運作邏輯</b>：外國人語音輸入外文時，畫面會<b>直接呈現大字中文</b>並播放中文語音，方便你立即理解。
             </div>
         </div>
     </div>
@@ -257,6 +257,10 @@
     let recognition = null;
     let isRecognizing = false;
     let isLoading = true;
+    
+    // 用來記錄當前結果是由「選單點選」還是「語音辨識」產生的，以便切換發音對象
+    let lastActionSource = 'select'; 
+    let lastVoiceType = 'foreign'; // 'chinese' 或 'foreign'
     
     const inputTextSelect = document.getElementById('inputText');
     const outputDiv = document.getElementById('outputText');
@@ -293,7 +297,6 @@
         } catch { return fallbackObj; }
     }
     
-    // 所有選單同步改為：外文在前 ➔ 中文在後，完美貼合對話式雙向操作
     function updateSelectOptions() {
         inputTextSelect.innerHTML = '';
         
@@ -305,10 +308,9 @@
         selectLabel.textContent = `🔽 ${langName}與中文雙向選單 (點選立即翻譯與發音)`;
         inputTextSelect.appendChild(defaultOpt);
         
-        // 一律以外文作為主軸排序
         Object.keys(activeBackwardMap).sort().forEach(foreign => {
             let opt = document.createElement('option');
-            opt.value = activeBackwardMap[foreign]; // 綁定內部中文核心值
+            opt.value = activeBackwardMap[foreign]; // 核心內部值為中文
             opt.textContent = `${foreign} ➔ ${activeBackwardMap[foreign]}`;
             inputTextSelect.appendChild(opt);
         });
@@ -322,7 +324,7 @@
         loadCustomFromStorage();
         rebuildActiveMaps();
         isLoading = false;
-        performTranslation(false); // 初始不自動播放
+        performTranslation(false); 
     }
     
     function loadCustomFromStorage() {
@@ -356,19 +358,29 @@
         updateSpeechLanguage();
     }
     
-    // 執行翻譯邏輯 (新增 triggerSpeak 參數，避免初次載入就嚇人一跳)
+    // 核心優化：重新編排翻譯顯示邏輯
     function performTranslation(triggerSpeak = true) {
         if(isLoading) { outputDiv.innerHTML="⏳ 字典資料載入中..."; return; }
         let selectedValue = inputTextSelect.value; 
         if(!selectedValue) { outputDiv.innerHTML="✨ 請選擇上方對話或按語音按鈕..."; return; }
         
-        // 尋找對應的外文內容
+        // 取得對應的外文
         let foreignText = Object.keys(activeBackwardMap).find(key => activeBackwardMap[key] === selectedValue) || activeForwardMap[selectedValue];
         
-        // 畫面上同時優雅地呈現兩者
-        outputDiv.innerHTML = `<span style="color:#1e3a5f; font-weight:700; font-size:0.95rem;">${selectedValue}</span> <br><small style="color:#475569; font-size:0.8rem;">(${foreignText})</small>`;
+        if (lastActionSource === 'voice' && lastVoiceType === 'foreign') {
+            // 【情境 A】外國人用語音講了外文 -> 畫面大字要顯示「中文翻譯」，方便我們看懂
+            outputDiv.innerHTML = `
+                <span style="color:#2c6e2f; font-weight:700; font-size:1.1rem;">${selectedValue}</span><br>
+                <small style="color:#64748b; font-size:0.75rem;">原始外文: ${foreignText}</small>
+            `;
+        } else {
+            // 【情境 B】我們點選單（主動發話）或我們用語音講中文 -> 畫面大字顯示「外文」，方便拿給外國人看
+            outputDiv.innerHTML = `
+                <span style="color:#1e3a5f; font-weight:700; font-size:1.1rem;">${foreignText}</span><br>
+                <small style="color:#64748b; font-size:0.75rem;">中文對照: ${selectedValue}</small>
+            `;
+        }
         
-        // 關鍵核心：若允許播放，翻譯完畢立即呼叫喇叭
         if(triggerSpeak) {
             speakText();
         }
@@ -385,31 +397,34 @@
         performTranslation(false);
     }
     
-    // 語音播放優化：自動解析要讀中文還是外文
+    // 核心優化：精準控制發音語系
     function speakText(){
         let rawContent = outputDiv.innerText.trim();
         if(!rawContent || rawContent.includes("✨") || rawContent.includes("⏳")) return;
         
-        // 切分出中文與括號裡面的外文
-        let lines = rawContent.split('\n');
-        let chinesePart = lines[0].trim();
-        let foreignPart = lines[1] ? lines[1].replace(/[\(\)]/g, '').trim() : '';
+        let selectedValue = inputTextSelect.value;
+        let foreignText = Object.keys(activeBackwardMap).find(key => activeBackwardMap[key] === selectedValue) || activeForwardMap[selectedValue];
         
-        // 如果使用者語音輸入的是外文，我們通常對外國人播放「中文回答」；
-        // 如果使用者點選的是外文選單，我們對外國人播放「外文內容」。
-        // 這裡做一個非常聰明的智慧判斷：如果外文包含中文標籤，代表沒對上，讀中文。
-        let textToSpeak = foreignPart && !foreignPart.includes("未收錄") ? foreignPart : chinesePart;
+        let textToSpeak = "";
+        let targetLang = "zh-TW";
+        
+        if (lastActionSource === 'voice' && lastVoiceType === 'foreign') {
+            // 外國人說的話 -> 讀中文給我們聽
+            textToSpeak = selectedValue;
+            targetLang = 'zh-TW';
+        } else {
+            // 我們點選單或說中文 -> 讀外文給外國人聽
+            textToSpeak = foreignText;
+            if(currentMode === 'korean') targetLang='ko-KR';
+            else if(currentMode === 'japanese') targetLang='ja-JP';
+            else targetLang='en-US';
+        }
+        
+        // 避免讀到未收錄等髒資料
+        if(textToSpeak.includes("Translation needed") || textToSpeak.includes("外文辨識")) return;
         
         let utterance = new SpeechSynthesisUtterance(textToSpeak);
-        
-        // 設定對應發音語系
-        if(textToSpeak === foreignPart) {
-            if(currentMode === 'korean') utterance.lang='ko-KR';
-            else if(currentMode === 'japanese') utterance.lang='ja-JP';
-            else utterance.lang='en-US';
-        } else {
-            utterance.lang='zh-TW';
-        }
+        utterance.lang = targetLang;
         
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(utterance);
@@ -421,7 +436,6 @@
         let langName = currentMode === 'general' ? '英/中' : (currentMode === 'japanese' ? '日/中' : '韓/中');
         voiceInputBtn.textContent = `🎤 語音輸入 (${langName})`;
         
-        // 預設辨識：中英模式聽英文、日語模式聽日文、韓語模式聽韓文
         if (currentMode === 'japanese') recognition.lang = 'ja-JP';
         else if (currentMode === 'korean') recognition.lang = 'ko-KR';
         else recognition.lang = 'en-US';
@@ -434,7 +448,6 @@
         }
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        // 開啟連續或嘗試更寬容的對話模式
         recognition.continuous=false;
         recognition.interimResults=false;
         
@@ -443,7 +456,7 @@
         recognition.onstart=()=>{
             isRecognizing=true;
             let targetLang = currentMode==='general'?'英文/中文':(currentMode==='japanese'?'日文':'韓文');
-            voiceStatusSpan.innerText = `🎙️ 正在聆聽 ${targetLang}...`;
+            voiceStatusSpan.innerText = `🎙️ 聆聽 ${targetLang}...`;
             voiceInputBtn.style.opacity='0.6';
         };
         recognition.onend=()=>{
@@ -452,9 +465,9 @@
             voiceInputBtn.style.opacity='1';
         };
         recognition.onerror=(event)=>{
-            // 友善容錯：如果外文聽不懂，自動切換成聽中文
+            // 友善容錯：外文聽不懂，點擊第二次時若還是不行，自動切換聽中文
             if(recognition.lang !== 'zh-TW') {
-                voiceStatusSpan.innerText='🔄 嘗試切換聽中文...';
+                voiceStatusSpan.innerText = '🔄 嘗試切換聽中文...';
                 recognition.lang = 'zh-TW';
                 try { recognition.start(); return; } catch(e){}
             }
@@ -467,11 +480,14 @@
                 let cleaned = cleanText(transcript);
                 let matchedChinese = "";
                 
+                // 標記本次操作來自語音
+                lastActionSource = 'voice';
+                
                 // 判斷聽到的是中文還是外文
                 let isChineseInput = /[\u4e00-\u9fa5]/.test(cleaned);
                 
                 if (isChineseInput) {
-                    // 聽到了中文
+                    lastVoiceType = 'chinese';
                     if(activeForwardMap[cleaned]) {
                         matchedChinese = cleaned;
                     } else {
@@ -480,14 +496,15 @@
                         activeBackwardMap[`[Translation needed] ${cleaned}`] = cleaned;
                     }
                 } else {
-                    // 聽到了外文
+                    lastVoiceType = 'foreign';
                     let lowCleaned = cleaned.toLowerCase();
                     let foundKey = Object.keys(activeBackwardMap).find(k => k.toLowerCase() === lowCleaned || k.toLowerCase().includes(lowCleaned));
                     
                     if (foundKey) {
                         matchedChinese = activeBackwardMap[foundKey];
                     } else {
-                        matchedChinese = `外文辨識_${cleaned}`;
+                        // 沒收錄時，直接把辨識到的外文當作顯示基底
+                        matchedChinese = `[辨識外文]: ${cleaned}`;
                         activeBackwardMap[cleaned] = matchedChinese;
                         activeForwardMap[matchedChinese] = cleaned;
                     }
@@ -496,10 +513,9 @@
                 updateSelectOptions();
                 inputTextSelect.value = matchedChinese;
                 
-                // 核心改動：翻譯完馬上自動播放語音 (帶入 true)
                 performTranslation(true);
                 
-                voiceStatusSpan.innerText='✅ 完成並發音';
+                voiceStatusSpan.innerText='✅ 已翻譯並發音';
                 setTimeout(()=>{ voiceStatusSpan.innerText=''; }, 1500);
             }
             recognition.stop();
@@ -508,7 +524,7 @@
     
     function startVoiceInput(){
         if(!recognition){ alert("不支援語音"); return; }
-        updateSpeechLanguage(); // 每次點擊都校正一次初始語系
+        updateSpeechLanguage(); 
         try{ recognition.start(); }catch(e){}
     }
     function stopVoiceInput(){
@@ -525,8 +541,9 @@
         saveCurrentCustom();
         rebuildActiveMaps();
         
+        lastActionSource = 'select'; // 自訂詞加入視同選單選取
         inputTextSelect.value = src;
-        performTranslation(true); // 新增完也自動放聲音確認
+        performTranslation(true); 
         document.getElementById('newWord').value='';
         document.getElementById('newTrans').value='';
         alert(`✅ 已新增並套用對話`);
@@ -544,8 +561,10 @@
     document.addEventListener('DOMContentLoaded', async ()=>{
         await loadAllDictionaries();
         
-        // 監聽選單變更 -> 自動翻譯並發音
-        inputTextSelect.addEventListener('change', () => performTranslation(true));
+        inputTextSelect.addEventListener('change', () => {
+            lastActionSource = 'select'; // 只要動了下拉選單，重設為 select 模式
+            performTranslation(true);
+        });
         
         clearBtn.addEventListener('click', ()=>{ inputTextSelect.value = ''; performTranslation(false); });
         addWordBtn.addEventListener('click', addCustomWord);
