@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-   <link rel="icon" href="icon-192.png">
-   <link rel="apple-touch-icon" href="icon-192.png">
-   <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="manifest" href="manifest.json">
 
-    <title>雙向對話翻譯助手 · 語音不對調版</title>
+    <title>雙向對話翻譯助手 · 萬用搜尋版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -55,12 +55,35 @@
         .input-group { margin-bottom: 12px; }
         label { font-weight: 700; font-size: 0.7rem; margin-bottom: 3px; display: flex; justify-content: space-between; }
         
-        /* 下拉選單 */
-        select.phrase-select {
-            width: 100%; padding: 8px 12px; font-size: 0.8rem; border: 2px solid #cbd5e1;
-            border-radius: 16px; font-family: inherit; font-weight: 500; background: #fefefe; color: #1e293b; outline: none; cursor: pointer;
+        /* 核心改良：搜尋輸入框與動態清單容器 */
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            padding-right: 8px;
         }
-        select.phrase-select:focus { border-color: #1e3a5f; box-shadow: 0 0 0 2px rgba(30,58,95,0.15); }
+        .search-input-wrapper:focus-within {
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 2px rgba(30,58,95,0.15);
+        }
+        input.phrase-search {
+            width: 100%; padding: 8px 12px; font-size: 0.85rem; border: none;
+            background: transparent; color: #1e293b; outline: none; font-family: inherit; font-weight: 500;
+        }
+        .phrase-list-container {
+            max-height: 160px; overflow-y: auto; background: #ffffff;
+            border: 1px solid #cbd5e1; border-radius: 14px; margin-top: 4px;
+            display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .phrase-item {
+            padding: 8px 12px; font-size: 0.75rem; color: #334155; cursor: pointer;
+            border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; gap: 8px;
+        }
+        .phrase-item:last-child { border-bottom: none; }
+        .phrase-item:hover, .phrase-item.selected { background: #e6f0ff; color: #1e3a5f; font-weight: 600; }
         
         .button-group { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; align-items: center; }
         
@@ -74,16 +97,16 @@
         
         /* 按鈕定義 */
         button { border: none; padding: 5px 12px; border-radius: 30px; color: white; font-weight: 600; font-size: 0.65rem; cursor: pointer; }
-        .voice-zh-btn { background: #0284c7; } /* 中文藍 */
-        .voice-foreign-btn { background: #ea580c; } /* 外文橘 */
+        .voice-zh-btn { background: #0284c7; } 
+        .voice-foreign-btn { background: #ea580c; } 
         .stop-btn { background: #9a3412; }
         .reset-btn { background: #64748b; }
         button.small { padding: 4px 10px; font-size: 0.6rem; }
         
         .custom-section { background: #f8fafc; border-radius: 16px; padding: 8px 10px; margin-top: 12px; border: 1px solid #e2e8f0; }
         .custom-section h4 { font-size: 0.7rem; margin: 0 0 6px 0; font-weight: 700; }
-        .flex-row { display: flex; gap: 6px; flex-wrap: wrap; }
-        .flex-row input { flex: 1; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 30px; font-size: 0.7rem; }
+        .custom-section flex-row { display: flex; gap: 6px; flex-wrap: wrap; }
+        .custom-section input { flex: 1; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 30px; font-size: 0.7rem; }
         .note { font-size: 0.55rem; color: #475569; text-align: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
         .badge { background: #e6f0ff; padding: 2px 6px; border-radius: 20px; font-size: 0.6rem; font-weight: 600; color: #1e3a5f; }
         .voice-status { font-size: 0.6rem; color: #2c6e2f; margin-left: 4px; font-weight: bold; }
@@ -94,26 +117,25 @@
     <div class="card">
         <div class="header">
             <h1>💬 雙向對話式隨身翻譯</h1>
-            <p>獨立語音按鈕 · 解決語系對調與發音錯誤問題</p>
+            <p>獨立語音按鈕 · 萬用搜尋比對優化版</p>
         </div>
         <div class="content">
 
-            <!-- 模式切換 -->
             <div class="mode-selector" id="modeSelector">
                 <button data-mode="general" class="mode-btn active">🇺🇸 中英對話模式</button>
                 <button data-mode="japanese" class="mode-btn">🗾 中日對話模式</button>
                 <button data-mode="korean" class="mode-btn">🇰🇷 中韓對話模式</button>
             </div>
 
-            <!-- 免打字快速選單 -->
             <div class="input-group">
-                <label>🔽 常用對話雙向對照庫 <span class="badge" id="langHint">模式: 中英對話</span></label>
-                <select id="inputText" class="phrase-select">
-                    <option value="">⏳ 正在載入對話字典...</option>
-                </select>
+                <label>🔍 輸入文字萬用搜尋字庫 <span class="badge" id="langHint">模式: 中英對話</span></label>
+                <div class="search-input-wrapper">
+                    <input type="text" id="phraseSearch" class="phrase-search" placeholder="输入任意中/外文關鍵字篩選字庫...">
+                </div>
+                <div id="phraseList" class="phrase-list-container"></div>
+
                 <div class="button-group">
-                    <button id="clearBtn" class="reset-btn">清除選擇</button>
-                    <!-- 核心改良：拆分兩個獨立語音鈕，誰說話就按誰 -->
+                    <button id="clearBtn" class="reset-btn">清除搜尋</button>
                     <button id="voiceZhBtn" class="voice-zh-btn">🎤 說中文</button>
                     <button id="voiceForeignBtn" class="voice-foreign-btn">🎤 說外文</button>
                     <button id="voiceStopBtn" class="stop-btn">⏹️ 停止</button>
@@ -121,11 +143,10 @@
                 </div>
             </div>
 
-            <!-- 翻譯結果與獨立重播 -->
             <div class="input-group">
                 <label>🔊 對話翻譯結果</label>
                 <div class="result-wrapper">
-                    <div class="result-box" id="outputText">✨ 請選擇上方對話，或點擊語音按鈕開始對話...</div>
+                    <div class="result-box" id="outputText">✨ 請利用上方搜尋框篩選對話，或點擊語音按鈕開始對話...</div>
                     <div style="display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px;">
                         <button id="speakZhBtn" class="small" style="background:#0284c7;">🔊 播中文</button>
                         <button id="speakForeignBtn" class="small" style="background:#ea580c;">🔊 播外文</button>
@@ -133,12 +154,11 @@
                 </div>
             </div>
 
-            <!-- 自訂詞彙 -->
             <div class="custom-section">
                 <h4>📝 新增日常對話句</h4>
-                <div class="flex-row">
-                    <input type="text" id="newWord" placeholder="中文內容">
-                    <input type="text" id="newTrans" placeholder="外文內容">
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <input type="text" id="newWord" placeholder="中文內容" style="flex:1; padding:5px 8px; border:1px solid #cbd5e1; border-radius:30px; font-size:0.7rem;">
+                    <input type="text" id="newTrans" placeholder="外文內容" style="flex:1; padding:5px 8px; border:1px solid #cbd5e1; border-radius:30px; font-size:0.7rem;">
                     <button id="addWordBtn" style="background:#1e3a5f;">➕ 新增</button>
                 </div>
                 <div style="margin-top: 6px; display: flex; gap: 6px;">
@@ -147,7 +167,7 @@
             </div>
             
             <div class="note">
-                💡 <b>對話指南</b>：你說話請按【🎤 說中文】（會自動放外文語音）；外國人說話請按【🎤 說外文】（辨識後會精準播放中文翻譯）。
+                💡 <b>搜尋小撇步</b>：在搜尋框輸入一個字（例如「車」或「飯店」），清單就會即時挑出所有相關對話，點擊即可直接發音！
             </div>
         </div>
     </div>
@@ -173,11 +193,11 @@
     let isLoading = true;
     let recognitionTarget = 'zh'; // 'zh' 或 'foreign'
     
-    // 當前暫存的雙語文字，供重播鈕隨時調用
     let currentZhText = "";
     let currentForeignText = "";
     
-    const inputTextSelect = document.getElementById('inputText');
+    const phraseSearchInput = document.getElementById('phraseSearch');
+    const phraseListContainer = document.getElementById('phraseList');
     const outputDiv = document.getElementById('outputText');
     const clearBtn = document.getElementById('clearBtn');
     const addWordBtn = document.getElementById('addWordBtn');
@@ -211,22 +231,43 @@
         } catch { return fallbackObj; }
     }
     
-    // 改良：下拉選單不再鎖定單向，直接呈現完整雙向對照「中文 ⇄ 外文」
-    function updateSelectOptions() {
-        inputTextSelect.innerHTML = '';
-        let defaultOpt = document.createElement('option');
-        defaultOpt.value = '';
-        defaultOpt.textContent = '--- 💡 點選對話免打字 (雙向通用) ---';
-        inputTextSelect.appendChild(defaultOpt);
+    // 改良：動態過濾並渲染搜尋清單
+    function filterAndRenderList(keyword = '') {
+        phraseListContainer.innerHTML = '';
+        const cleanKey = keyword.toLowerCase().trim();
         
-        // 依中文排序並塞入選單
-        Object.keys(activeForwardMap).sort((a,b)=>a.localeCompare(b,'zh')).forEach(zh => {
-            let foreign = activeForwardMap[zh];
-            let opt = document.createElement('option');
-            opt.value = `${zh}|${foreign}`; // 用分隔符號儲存雙向資料
-            opt.textContent = `${zh} ⇄ ${foreign}`;
-            inputTextSelect.appendChild(opt);
+        let filteredKeys = Object.keys(activeForwardMap).filter(zh => {
+            const foreign = activeForwardMap[zh].toLowerCase();
+            return zh.includes(cleanKey) || foreign.includes(cleanKey);
         });
+
+        // 依中文排序
+        filteredKeys.sort((a,b) => a.localeCompare(b,'zh'));
+
+        if(filteredKeys.length === 0) {
+            phraseListContainer.style.display = keyword ? 'block' : 'none';
+            phraseListContainer.innerHTML = '<div class="phrase-item" style="color:#94a3b8; cursor:default;">❌ 找不到對應的對話...</div>';
+            return;
+        }
+
+        filteredKeys.forEach(zh => {
+            const foreign = activeForwardMap[zh];
+            const item = document.createElement('div');
+            item.className = 'phrase-item';
+            item.innerHTML = `<span>${zh}</span><span style="color:#64748b; font-size:0.65rem;">${foreign}</span>`;
+            
+            // 點擊事件：直接帶入並執行翻譯發音
+            item.addEventListener('click', () => {
+                phraseSearchInput.value = zh;
+                currentZhText = zh;
+                currentForeignText = foreign;
+                phraseListContainer.style.display = 'none';
+                renderTranslationView(currentForeignText, `中文對照: ${currentZhText}`, getForeignLangCode());
+            });
+            phraseListContainer.appendChild(item);
+        });
+
+        phraseListContainer.style.display = 'block';
     }
     
     async function loadAllDictionaries() {
@@ -237,7 +278,7 @@
         loadCustomFromStorage();
         rebuildActiveMaps();
         isLoading = false;
-        renderTranslationView("✨ 請選擇對話或開始語音錄音...", "", null);
+        renderTranslationView("✨ 請於上方搜尋框輸入關鍵字，或使用語音對話...", "", null);
     }
     
     function loadCustomFromStorage() {
@@ -268,10 +309,10 @@
         voiceForeignBtn.textContent = `🎤 說${langLabel}`;
         langHintSpan.innerText = `模式: 中${langLabel}雙向對話`;
         
-        updateSelectOptions();
+        phraseSearchInput.value = '';
+        phraseListContainer.style.display = 'none';
     }
     
-    // 統一渲染介面與發音的函數 (完美拆分語系)
     function renderTranslationView(bigText, smallText, speakLang) {
         outputDiv.innerHTML = `
             <div style="font-size: 1.15rem; font-weight: 700; color: #1e3a5f; margin-bottom: 4px;">${bigText}</div>
@@ -297,13 +338,14 @@
         currentMode=mode;
         modeBtns.forEach(btn=>{
             if(btn.getAttribute('data-mode')===mode) btn.classList.add('active');
-            else btn.classList.remove('active');
+            else btn.classList.remove('remove');
         });
+        modeBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === mode));
         rebuildActiveMaps();
-        renderTranslationView("✨ 模式已切換，請選擇對話或使用語音...", "", null);
+        renderTranslationView("✨ 模式已切換，請輸入搜尋或使用語音...", "", null);
     }
     
-    // ----------------------------- 雙向語音辨識核心 -----------------------------
+    // ----------------------------- 雙向語音辨識核心 (升級模糊比對) -----------------------------
     function initSpeechRecognition() {
         if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
             voiceStatusSpan.innerText='⚠️ 瀏覽器不支援語音功能';
@@ -333,33 +375,36 @@
             let transcript = event.results[0][0].transcript;
             if(!transcript) return;
             let cleaned = cleanText(transcript);
+            let lowCleaned = cleaned.toLowerCase();
             
             if (recognitionTarget === 'zh') {
-                // 【情境 1】你說中文 -> 畫面大字秀外文（給對方看），語音直接自動播放外文
                 currentZhText = cleaned;
-                let foreignText = activeForwardMap[cleaned];
+                // 改良：先找完全相同，找不到再用包含(模糊)尋找
+                let foundZhKey = Object.keys(activeForwardMap).find(k => k === cleaned || cleaned.includes(k) || k.includes(cleaned));
+                let foreignText = foundZhKey ? activeForwardMap[foundZhKey] : null;
                 let foreignCode = getForeignLangCode();
                 
                 if (foreignText) {
                     currentForeignText = foreignText;
-                    inputTextSelect.value = `${cleaned}|${foreignText}`; // 同步下拉選單亮燈
-                    renderTranslationView(foreignText, `原始中文: ${cleaned}`, foreignCode);
+                    phraseSearchInput.value = foundZhKey; // 搜尋框顯示比對到的關鍵句
+                    renderTranslationView(foreignText, `識別中文: ${cleaned} (對照: ${foundZhKey})`, foreignCode);
                 } else {
                     currentForeignText = "[未收錄此對話翻譯]";
                     renderTranslationView(`[未收錄詞庫] ${cleaned}`, "可於下方新增此句對話", null);
                 }
             } else {
-                // 【情境 2】外國人說外文 -> 畫面大字秀中文（給你看），語音精準自動播放中文！
                 currentForeignText = cleaned;
-                let lowCleaned = cleaned.toLowerCase();
-                // 支援不分大小寫的模糊反查
-                let foundForeignIdx = Object.keys(activeBackwardMap).find(k => k.toLowerCase() === lowCleaned || k.toLowerCase().includes(lowCleaned));
+                // 外文模糊反查
+                let foundForeignIdx = Object.keys(activeBackwardMap).find(k => {
+                    let lowK = k.toLowerCase();
+                    return lowK === lowCleaned || lowCleaned.includes(lowK) || lowK.includes(lowCleaned);
+                });
                 let zhText = foundForeignIdx ? activeBackwardMap[foundForeignIdx] : null;
                 
                 if (zhText) {
                     currentZhText = zhText;
-                    inputTextSelect.value = `${zhText}|${foundForeignIdx}`; // 同步下拉選單亮燈
-                    renderTranslationView(zhText, `Original: ${cleaned}`, 'zh-TW'); // 精準播放中文聲音！
+                    phraseSearchInput.value = zhText;
+                    renderTranslationView(zhText, `Original: ${cleaned} (Match: ${foundForeignIdx})`, 'zh-TW');
                 } else {
                     currentZhText = "[未收錄此句中文翻譯]";
                     renderTranslationView(`[外文辨識成功]: ${cleaned}`, "字典無對應中文，請手動自訂擴充", null);
@@ -373,11 +418,7 @@
         if (isRecognizing) recognition.stop();
         
         recognitionTarget = target;
-        if (target === 'zh') {
-            recognition.lang = 'zh-TW';
-        } else {
-            recognition.lang = getForeignLangCode();
-        }
+        recognition.lang = target === 'zh' ? 'zh-TW' : getForeignLangCode();
         
         try { recognition.start(); } catch(e){}
     }
@@ -390,31 +431,31 @@
     document.addEventListener('DOMContentLoaded', async ()=>{
         await loadAllDictionaries();
         
-        // 點選連動下拉選單：預設為使用者（你）挑選對話發話給外國人 -> 大字顯示外文並播放外文
-        inputTextSelect.addEventListener('change', () => {
-            let val = inputTextSelect.value;
-            if (!val) {
-                renderTranslationView("✨ 請選擇對話或開始語音錄音...", "", null);
-                return;
+        // 搜尋框輸入監聽（動態過濾）
+        phraseSearchInput.addEventListener('input', (e) => {
+            filterAndRenderList(e.target.value);
+        });
+
+        // 點擊外圍自動收起下拉清單
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.input-group')) {
+                phraseListContainer.style.display = 'none';
             }
-            let parts = val.split('|');
-            currentZhText = parts[0];
-            currentForeignText = parts[1];
-            renderTranslationView(currentForeignText, `中文對照: ${currentZhText}`, getForeignLangCode());
         });
         
         clearBtn.addEventListener('click', () => {
-            inputTextSelect.value = '';
+            phraseSearchInput.value = '';
+            phraseListContainer.style.display = 'none';
             currentZhText = ""; currentForeignText = "";
-            renderTranslationView("✨ 請選擇對話或開始語音錄音...", "", null);
+            renderTranslationView("✨ 請於上方搜尋框輸入關鍵字，或使用語音對話...", "", null);
         });
         
-        // 雙語音獨立按鈕監聽
+        // 雙語音獨立按鈕
         voiceZhBtn.addEventListener('click', () => startVoiceInput('zh'));
         voiceForeignBtn.addEventListener('click', () => startVoiceInput('foreign'));
         voiceStopBtn.addEventListener('click', stopVoiceInput);
         
-        // 雙獨立手動重播鈕
+        // 手動重播
         speakZhBtn.addEventListener('click', () => {
             if (!currentZhText || currentZhText.includes('[未收錄]')) return;
             let utterance = new SpeechSynthesisUtterance(currentZhText);
@@ -431,7 +472,7 @@
             window.speechSynthesis.speak(utterance);
         });
         
-        // 自訂日常對話
+        // 新增自訂日常對話
         addWordBtn.addEventListener('click', () => {
             const src = document.getElementById('newWord').value.trim();
             const tgt = document.getElementById('newTrans').value.trim();
@@ -443,7 +484,7 @@
             rebuildActiveMaps();
             
             currentZhText = src; currentForeignText = tgt;
-            inputTextSelect.value = `${src}|${tgt}`;
+            phraseSearchInput.value = src;
             renderTranslationView(tgt, `中文對照: ${src}`, getForeignLangCode());
             
             document.getElementById('newWord').value = '';
