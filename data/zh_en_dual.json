@@ -2490,3 +2490,87 @@
   "路上小心": "Take care / Drive safely",
   "旅途愉快": "Have a nice trip / Safe travels"
 }
+{
+  "phrases": {
+    "hotel_check_in": {
+      "zh": "我要辦理入住",
+      "en": "I want to check in."
+    },
+    "hotel_check_out": {
+      "zh": "我要辦理退房",
+      "en": "I want to check out."
+    },
+    "reservation": {
+      "zh": "我有預約",
+      "en": "I have a reservation."
+    },
+    "wifi": {
+      "zh": "有免費WiFi嗎？",
+      "en": "Is there free WiFi?"
+    },
+    "taxi": {
+      "zh": "請幫我叫計程車",
+      "en": "Please call a taxi for me."
+    },
+    "menu": {
+      "zh": "請給我菜單",
+      "en": "May I have the menu?"
+    },
+    "order_this": {
+      "zh": "我要這個",
+      "en": "I would like this."
+    },
+    "no_spicy": {
+      "zh": "不要辣",
+      "en": "No spicy."
+    },
+    "bill": {
+      "zh": "請結帳",
+      "en": "Check please."
+    },
+    "takeaway": {
+      "zh": "可以外帶嗎？",
+      "en": "Can I take this to go?"
+    },
+    "direction": {
+      "zh": "帶我去這個地址",
+      "en": "Take me to this address."
+    },
+    "how_much": {
+      "zh": "多少錢？",
+      "en": "How much is it?"
+    },
+    "how_long": {
+      "zh": "多久會到？",
+      "en": "How long does it take?"
+    },
+    "stop_here": {
+      "zh": "請停在這裡",
+      "en": "Please stop here."
+    },
+    "help": {
+      "zh": "救命！",
+      "en": "Help!"
+    },
+    "doctor": {
+      "zh": "我需要醫生",
+      "en": "I need a doctor."
+    },
+    "lost": {
+      "zh": "我迷路了",
+      "en": "I am lost."
+    },
+    "hello": {
+      "zh": "你好",
+      "en": "Hello"
+    },
+    "thank_you": {
+      "zh": "謝謝",
+      "en": "Thank you"
+    },
+    "sorry": {
+      "zh": "不好意思",
+      "en": "Excuse me"
+    }
+  }
+}
