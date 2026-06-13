@@ -112,6 +112,19 @@
         .voice-status { font-size: 0.6rem; color: #2c6e2f; margin-left: 4px; font-weight: bold; }
     </style>
 </head>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+        .then(reg => {
+            console.log('Service Worker 已啟用');
+        })
+        .catch(err => {
+            console.log('Service Worker 失敗:', err);
+        });
+    });
+}
+</script>    
 <body>
 <div class="app-container">
     <div class="card">
