@@ -1,515 +1,935 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <link rel="icon" href="icon-192.png">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>離線翻譯 / 旅遊對話助手</title>
 
-    <title>雙向對話翻譯助手 · 挑選確認版</title>
     <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; }
+
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang TC', 'Microsoft YaHei', 'Noto Sans CJK TC', 'Noto Sans Japanese', 'Noto Sans Korean', 'Helvetica Neue', sans-serif;
-            font-weight: 500;
-            background: #eef2f7;
             margin: 0;
-            min-height: 100vh;
-            padding: 6px;
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+            color: #1e293b;
         }
-        .app-container {
-            max-width: 700px;
+
+        .container {
+            max-width: 980px;
             margin: 0 auto;
+            padding: 20px 14px 40px;
         }
+
         .card {
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-            overflow: hidden;
-            margin-bottom: 12px;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 10px 28px rgba(30, 41, 59, 0.08);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #e2e8f0;
         }
-        .header {
-            background: #1e3a5f;
-            padding: 10px 14px;
-            color: white;
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 1.6rem;
+            color: #0f172a;
         }
-        .header h1 { margin: 0 0 2px 0; font-size: 1.2rem; font-weight: 700; }
-        .header p { margin: 0; font-size: 0.6rem; opacity: 0.85; }
-        .content { padding: 10px 12px; }
-        
-        /* 模式切換 */
-        .mode-selector {
-            display: flex; gap: 5px; margin-bottom: 12px;
-            background: #f8fafc; padding: 5px 8px; border-radius: 40px; justify-content: center;
+
+        .subtext {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            line-height: 1.7;
         }
+
+        .mode-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 16px 0 8px;
+        }
+
         .mode-btn {
-            background: transparent; border: none; padding: 4px 10px;
-            border-radius: 40px; font-weight: 600; font-size: 0.7rem; cursor: pointer; color: #334155;
+            border: none;
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .mode-btn.active { background: #1e3a5f; color: white; }
-        
-        .input-group { margin-bottom: 12px; }
-        label { font-weight: 700; font-size: 0.7rem; margin-bottom: 3px; display: flex; justify-content: space-between; }
-        
-        /* 搜尋輸入框與動態清單容器 */
+
+        .mode-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+        }
+
+        label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin: 12px 0 8px;
+            color: #1e293b;
+        }
+
+        .badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 0.78rem;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        .category-row {
+            margin-bottom: 8px;
+        }
+
+        .category-row select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 2px solid #cbd5e1;
+            outline: none;
+            font-size: 0.92rem;
+            font-family: inherit;
+            background: #fff;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .category-row select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+        }
+
         .search-input-wrapper {
             position: relative;
-            display: flex;
-            align-items: center;
-            background: #ffffff;
-            border: 2px solid #cbd5e1;
+        }
+
+        #phraseSearch {
+            width: 100%;
+            padding: 12px 14px;
             border-radius: 16px;
-            padding-right: 8px;
+            border: 2px solid #cbd5e1;
+            outline: none;
+            font-size: 0.95rem;
+            transition: 0.2s;
         }
-        .search-input-wrapper:focus-within {
-            border-color: #1e3a5f;
-            box-shadow: 0 0 0 2px rgba(30,58,95,0.15);
+
+        #phraseSearch:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
         }
-        input.phrase-search {
-            width: 100%; padding: 8px 12px; font-size: 0.85rem; border: none;
-            background: transparent; color: #1e293b; outline: none; font-family: inherit; font-weight: 500;
+
+        .phrase-list {
+            display: none;
+            margin-top: 8px;
+            max-height: 320px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
         }
-        .phrase-list-container {
-            max-height: 200px; overflow-y: auto; background: #ffffff;
-            border: 2px solid #1e3a5f; border-radius: 14px; margin-top: 4px;
-            display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+
         .phrase-item {
-            padding: 10px 12px; font-size: 0.8rem; color: #334155; cursor: pointer;
-            border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; gap: 8px;
-            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        .phrase-item:last-child { border-bottom: none; }
-        .phrase-item:hover, .phrase-item.highlighted { background: #e6f0ff; color: #1e3a5f; font-weight: 600; }
-        
-        .button-group { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; align-items: center; }
-        
-        /* 翻譯對話框 */
-        .result-wrapper {
-            background: #f1f5f9; border-radius: 14px; padding: 10px 12px;
-            border-left: 4px solid #1e3a5f; margin-top: 5px;
-            display: flex; flex-direction: column; gap: 8px;
+
+        .phrase-item:last-child {
+            border-bottom: none;
         }
-        .result-box { font-size: 0.85rem; font-weight: 500; word-break: break-word; }
-        
-        /* 按鈕定義 */
-        button { border: none; padding: 5px 12px; border-radius: 30px; color: white; font-weight: 600; font-size: 0.65rem; cursor: pointer; }
-        .voice-zh-btn { background: #0284c7; } 
-        .voice-foreign-btn { background: #ea580c; } 
-        .stop-btn { background: #9a3412; }
-        .reset-btn { background: #64748b; }
-        button.small { padding: 4px 10px; font-size: 0.6rem; }
-        
-        .custom-section { background: #f8fafc; border-radius: 16px; padding: 8px 10px; margin-top: 12px; border: 1px solid #e2e8f0; }
-        .custom-section h4 { font-size: 0.7rem; margin: 0 0 6px 0; font-weight: 700; }
-        .custom-section input { flex: 1; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 30px; font-size: 0.7rem; }
-        .note { font-size: 0.55rem; color: #475569; text-align: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
-        .badge { background: #e6f0ff; padding: 2px 6px; border-radius: 20px; font-size: 0.6rem; font-weight: 600; color: #1e3a5f; }
-        .voice-status { font-size: 0.6rem; color: #2c6e2f; margin-left: 4px; font-weight: bold; }
+
+        .phrase-item:hover {
+            background: #eff6ff;
+        }
+
+        .result-box {
+            min-height: 110px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            padding: 18px;
+            margin-top: 10px;
+            line-height: 1.7;
+        }
+
+        .action-row,
+        .voice-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        button {
+            border: none;
+            border-radius: 14px;
+            padding: 10px 16px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #fff;
+        }
+
+        .btn-orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+        }
+
+        .btn-red {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+        }
+
+        .btn-gray {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .voice-status {
+            margin-left: 6px;
+            color: #b45309;
+            font-size: 0.88rem;
+            font-weight: 700;
+            align-self: center;
+        }
+
+        .custom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .custom-grid input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 2px solid #cbd5e1;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .custom-grid input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+        }
+
+        .small-note {
+            color: #64748b;
+            font-size: 0.84rem;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 720px) {
+            .custom-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 14px 10px 28px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+        }
     </style>
 </head>
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-        .then(reg => {
-            console.log('Service Worker 已啟用');
-        })
-        .catch(err => {
-            console.log('Service Worker 失敗:', err);
-        });
-    });
-}
-</script> 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('SW OK'))
-      .catch(err => console.log(err));
-  });
-}
-</script>    
 <body>
-<div class="app-container">
-    <div class="card">
-        <div class="header">
-            <h1>💬 雙向對話式隨身翻譯</h1>
-            <p>獨立語音按鈕 · 搜尋/語音比對清單挑選版</p>
+    <div class="container">
+        <div class="card">
+            <h1>🧳 離線翻譯 / 旅遊對話助手</h1>
+            <div class="subtext">
+                支援 <strong>中英 / 中日 / 中韓</strong> 對話句庫搜尋、分類篩選、語音搜尋、點句自動播放外語，
+                也可以自行新增常用對話到本機自訂詞庫。
+            </div>
+
+            <div class="mode-bar">
+                <button class="mode-btn active" data-mode="general">🇺🇸 中英對話</button>
+                <button class="mode-btn" data-mode="japanese">🇯🇵 中日對話</button>
+                <button class="mode-btn" data-mode="korean">🇰🇷 中韓對話</button>
+            </div>
         </div>
-        <div class="content">
 
-            <!-- 模式切換 -->
-            <div class="mode-selector" id="modeSelector">
-                <button data-mode="general" class="mode-btn active">🇺🇸 中英對話模式</button>
-                <button data-mode="japanese" class="mode-btn">🗾 中日對話模式</button>
-                <button data-mode="korean" class="mode-btn">🇰🇷 中韓對話模式</button>
+        <div class="card">
+            <label>
+                🔍 搜尋或用語音篩選字庫
+                <span class="badge" id="langHint">模式: 中英雙向對話</span>
+            </label>
+
+            <!-- 新增：分類下拉 -->
+            <div class="category-row">
+                <select id="categorySelect">
+                    <option value="全部分類">全部分類</option>
+                </select>
             </div>
 
-            <!-- 核心改進：輸入或語音後不直接執行，而是展開清單供挑選 -->
-            <div class="input-group">
-                <label>🔍 搜尋或用語音篩選字庫 <span class="badge" id="langHint">模式: 中英對話</span></label>
-                <div class="search-input-wrapper">
-                    <input type="text" id="phraseSearch" class="phrase-search" placeholder="輸入文字或按下方語音進行篩選...">
-                </div>
-                
-                <!-- 動態生成的下拉清單（挑選完才翻譯） -->
-                <div id="phraseList" class="phrase-list-container"></div>
-
-                <div class="button-group">
-                    <button id="clearBtn" class="reset-btn">清除重設</button>
-                    <button id="voiceZhBtn" class="voice-zh-btn">🎤 說中文篩選</button>
-                    <button id="voiceForeignBtn" class="voice-foreign-btn">🎤 說外文篩選</button>
-                    <button id="voiceStopBtn" class="stop-btn">⏹️ 停止聆聽</button>
-                    <span id="voiceStatus" class="voice-status"></span>
-                </div>
+            <div class="search-input-wrapper">
+                <input
+                    type="text"
+                    id="phraseSearch"
+                    placeholder="輸入中文或外文關鍵字，例如：菜單 / airport / 退房 / taxi"
+                    autocomplete="off"
+                />
             </div>
 
-            <!-- 翻譯結果與獨立重播 -->
-            <div class="input-group">
-                <label>🔊 對話翻譯結果</label>
-                <div class="result-wrapper">
-                    <div class="result-box" id="outputText">✨ 請利用上方輸入框或語音按鈕篩選字庫，並點選清單中的句子進行對話翻譯...</div>
-                    <div style="display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px;">
-                        <button id="speakZhBtn" class="small" style="background:#0284c7;">🔊 播中文</button>
-                        <button id="speakForeignBtn" class="small" style="background:#ea580c;">🔊 播外文</button>
-                    </div>
-                </div>
+            <div id="phraseList" class="phrase-list"></div>
+
+            <div class="voice-row">
+                <button id="voiceZhBtn" class="btn-blue">🎤 說中文篩選</button>
+                <button id="voiceForeignBtn" class="btn-green">🎤 說英文篩選</button>
+                <button id="voiceStopBtn" class="btn-red">⏹ 停止語音</button>
+                <span id="voiceStatus" class="voice-status"></span>
             </div>
 
-            <!-- 自訂詞彙 -->
-            <div class="custom-section">
-                <h4>📝 新增日常對話句</h4>
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <input type="text" id="newWord" placeholder="中文內容" style="flex:1; padding:5px 8px; border:1px solid #cbd5e1; border-radius:30px; font-size:0.7rem;">
-                    <input type="text" id="newTrans" placeholder="外文內容" style="flex:1; padding:5px 8px; border:1px solid #cbd5e1; border-radius:30px; font-size:0.7rem;">
-                    <button id="addWordBtn" style="background:#1e3a5f;">➕ 新增</button>
-                </div>
-                <div style="margin-top: 6px; display: flex; gap: 6px;">
-                    <button id="resetCustomBtn" class="small" style="background:#64748b;">🗑️ 清除當前自訂對話</button>
-                </div>
+            <div id="outputText" class="result-box">
+                ✨ 請先選分類，或輸入文字 / 使用語音篩選詞庫...
             </div>
-            
-            <div class="note">
-                💡 <b>操作說明</b>：無論是打字還是用語音說話，系統都只會幫你「過濾出相關的對話清單」，<b>必須點擊清單中的項目</b>，才會正式發音翻譯。
+
+            <div class="action-row">
+                <button id="speakZhBtn" class="btn-orange">🔊 播放中文</button>
+                <button id="speakForeignBtn" class="btn-orange">🔊 播放外語</button>
+                <button id="clearBtn" class="btn-gray">🧹 清除 / 重設</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <label>➕ 新增自訂對話</label>
+            <div class="custom-grid">
+                <input type="text" id="newWord" placeholder="輸入中文，例如：請幫我叫計程車" />
+                <input type="text" id="newTrans" placeholder="輸入對應外文翻譯" />
+            </div>
+
+            <div class="action-row">
+                <button id="addWordBtn" class="btn-blue">➕ 加入目前模式詞庫</button>
+                <button id="resetCustomBtn" class="btn-red">🗑 清空目前模式自訂詞庫</button>
+            </div>
+
+            <div class="small-note">
+                自訂詞彙會儲存在瀏覽器本機（LocalStorage），依模式分開保存：
+                <strong>中英 / 中日 / 中韓</strong> 各自獨立。
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // ----------------------------- 字典與全域變數 -----------------------------
-    let currentMode = 'general';
-    let dictGeneral = { dual: {} };
-    let dictJapanese = { dual: {} };
-    let dictKorean = { dual: {} };
-    
-    let customDict = {
-        general: { forward: {}, backward: {} },
-        japanese: { forward: {}, backward: {} },
-        korean: { forward: {}, backward: {} }
-    };
-    
-    let activeForwardMap = {}; // 中 -> 外
-    let activeBackwardMap = {}; // 外 -> 中
-    let recognition = null;
-    let isRecognizing = false;
-    let isLoading = true;
-    let recognitionTarget = 'zh'; 
-    
-    let currentZhText = "";
-    let currentForeignText = "";
-    
-    const phraseSearchInput = document.getElementById('phraseSearch');
-    const phraseListContainer = document.getElementById('phraseList');
-    const outputDiv = document.getElementById('outputText');
-    const clearBtn = document.getElementById('clearBtn');
-    const addWordBtn = document.getElementById('addWordBtn');
-    const resetCustomBtn = document.getElementById('resetCustomBtn');
-    
-    const voiceZhBtn = document.getElementById('voiceZhBtn');
-    const voiceForeignBtn = document.getElementById('voiceForeignBtn');
-    const voiceStopBtn = document.getElementById('voiceStopBtn');
-    const voiceStatusSpan = document.getElementById('voiceStatus');
-    
-    const speakZhBtn = document.getElementById('speakZhBtn');
-    const speakForeignBtn = document.getElementById('speakForeignBtn');
-    const modeBtns = document.querySelectorAll('.mode-btn');
-    const langHintSpan = document.getElementById('langHint');
-    
-    function cleanText(text) {
-        return text.trim().replace(/[。，！？；：""''（）【】《》…—・、,\.!\?;:\(\)\[\]\{\}<>]/g, '').replace(/\s+/g, ' ').trim();
-    }
-    
-    function getFallbackDict(langType) {
-        if (langType === 'en') return { "你好":"Hello","謝謝":"Thank you","多少錢":"How much","對不起":"Sorry","沒問題":"No problem" };
-        if (langType === 'ja') return { "你好":"こんにちは","謝謝":"ありがとう","多少錢":"いくらですか","對不起":"すみません","沒問題":"問題ないです" };
-        return { "你好":"안녕하세요","謝謝":"감사합니다","多少錢":"얼마예요","對不起":"죄송합니다","沒問題":"문제 없어요" };
-    }
-    
-    async function loadJSON(url, fallbackObj) {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error();
-            return await res.json();
-        } catch { return fallbackObj; }
-    }
-    
-    // 渲染搜尋篩選清單（此處純展示，點擊才會觸發翻譯）
-    function filterAndRenderList(keyword = '') {
-        phraseListContainer.innerHTML = '';
-        const cleanKey = keyword.toLowerCase().trim();
-        
-        // 如果完全沒有關鍵字，預設不主動展開所有項目，避免干擾
-        if (!cleanKey) {
-            phraseListContainer.style.display = 'none';
-            return;
-        }
-        
-        // 篩選出中文或外文包含關鍵字的項目
-        let filteredKeys = Object.keys(activeForwardMap).filter(zh => {
-            const foreign = activeForwardMap[zh].toLowerCase();
-            return zh.includes(cleanKey) || foreign.includes(cleanKey);
-        });
+    <script>
+        // ----------------------------- 字典與全域變數 -----------------------------
+        let currentMode = 'general';
+        let dictGeneral = { dual: {} };
+        let dictJapanese = { dual: {} };
+        let dictKorean = { dual: {} };
 
-        filteredKeys.sort((a,b) => a.localeCompare(b,'zh'));
+        let customDict = {
+            general: { forward: {}, backward: {} },
+            japanese: { forward: {}, backward: {} },
+            korean: { forward: {}, backward: {} }
+        };
 
-        if(filteredKeys.length === 0) {
-            phraseListContainer.style.display = 'block';
-            phraseListContainer.innerHTML = '<div class="phrase-item" style="color:#94a3b8; cursor:default;">❌ 找不到符合此關鍵字的對話...</div>';
-            return;
+        let activeForwardMap = {};   // 中文 -> 外文
+        let activeBackwardMap = {};  // 外文 -> 中文
+        let categorizedPhraseMap = { general: {}, japanese: {}, korean: {} };
+
+        let recognition = null;
+        let isRecognizing = false;
+        let recognitionTarget = 'zh';
+
+        let currentZhText = "";
+        let currentForeignText = "";
+
+        const phraseSearchInput = document.getElementById('phraseSearch');
+        const phraseListContainer = document.getElementById('phraseList');
+        const categorySelect = document.getElementById('categorySelect');
+        const outputDiv = document.getElementById('outputText');
+        const clearBtn = document.getElementById('clearBtn');
+        const addWordBtn = document.getElementById('addWordBtn');
+        const resetCustomBtn = document.getElementById('resetCustomBtn');
+
+        const voiceZhBtn = document.getElementById('voiceZhBtn');
+        const voiceForeignBtn = document.getElementById('voiceForeignBtn');
+        const voiceStopBtn = document.getElementById('voiceStopBtn');
+        const voiceStatusSpan = document.getElementById('voiceStatus');
+
+        const speakZhBtn = document.getElementById('speakZhBtn');
+        const speakForeignBtn = document.getElementById('speakForeignBtn');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const langHintSpan = document.getElementById('langHint');
+
+        const CATEGORY_ALL = '全部分類';
+
+        // ----------------------------- 工具 -----------------------------
+        function cleanText(text) {
+            return text
+                .trim()
+                .replace(/[。，！？；：""''（）【】《》…—・、,\.!\?;:\(\)\[\]\{\}<>]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
         }
 
-        filteredKeys.forEach(zh => {
-            const foreign = activeForwardMap[zh];
-            const item = document.createElement('div');
-            item.className = 'phrase-item';
-            item.innerHTML = `<span>${zh}</span><span style="color:#64748b; font-size:0.65rem;">${foreign}</span>`;
-            
-            // 核心變更：點擊後才真正帶入、顯示翻譯與播放語音
-            item.addEventListener('click', () => {
-                phraseSearchInput.value = zh;
-                currentZhText = zh;
-                currentForeignText = foreign;
-                phraseListContainer.style.display = 'none'; // 挑完後收起
-                
-                // 執行翻譯視圖與播放語音
-                renderTranslationView(currentForeignText, `中文對照: ${currentZhText}`, getForeignLangCode());
-            });
-            phraseListContainer.appendChild(item);
-        });
-
-        phraseListContainer.style.display = 'block';
-    }
-    
-    async function loadAllDictionaries() {
-        dictGeneral.dual = await loadJSON('data/zh_en_dual.json', getFallbackDict('en'));
-        dictJapanese.dual = await loadJSON('data/zh_ja_dual.json', getFallbackDict('ja'));
-        dictKorean.dual = await loadJSON('data/zh_ko_dual.json', getFallbackDict('ko'));
-        
-        loadCustomFromStorage();
-        rebuildActiveMaps();
-        isLoading = false;
-        renderTranslationView("✨ 請輸入文字或點擊語音按鈕來篩選詞庫...", "", null);
-    }
-    
-    function loadCustomFromStorage() {
-        ['general','japanese','korean'].forEach(mode=>{
-            const stored = localStorage.getItem(`customDict_${mode}`);
-            if(stored) try{ customDict[mode]=JSON.parse(stored); }catch(e){}
-            else customDict[mode]={ forward:{}, backward:{} };
-        });
-    }
-    
-    function saveCurrentCustom() { localStorage.setItem(`customDict_${currentMode}`, JSON.stringify(customDict[currentMode])); }
-    
-    function rebuildActiveMaps() {
-        let baseForward={}, baseBackward={};
-        if(currentMode==='general') { baseForward={...dictGeneral.dual}; for(let [k,v] of Object.entries(baseForward)) baseBackward[v]=k; }
-        else if(currentMode==='japanese') { baseForward={...dictJapanese.dual}; for(let [k,v] of Object.entries(baseForward)) baseBackward[v]=k; }
-        else { baseForward={...dictKorean.dual}; for(let [k,v] of Object.entries(baseForward)) baseBackward[v]=k; }
-        
-        const cf = customDict[currentMode].forward || {};
-        const cb = customDict[currentMode].backward || {};
-        activeForwardMap = { ...baseForward, ...cf };
-        activeBackwardMap = { ...baseBackward, ...cb };
-        
-        for(let [src,tgt] of Object.entries(cf)) if(!activeBackwardMap[tgt]) activeBackwardMap[tgt]=src;
-        for(let [tgt,src] of Object.entries(cb)) if(!activeForwardMap[src]) activeForwardMap[src]=tgt;
-        
-        let langLabel = currentMode === 'general' ? '英文' : (currentMode === 'japanese' ? '日文' : '韓文');
-        voiceForeignBtn.textContent = `🎤 說${langLabel}篩選`;
-        langHintSpan.innerText = `模式: 中${langLabel}雙向對話`;
-        
-        phraseSearchInput.value = '';
-        phraseListContainer.style.display = 'none';
-    }
-    
-    function renderTranslationView(bigText, smallText, speakLang) {
-        outputDiv.innerHTML = `
-            <div style="font-size: 1.15rem; font-weight: 700; color: #1e3a5f; margin-bottom: 4px;">${bigText}</div>
-            <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">${smallText}</div>
-        `;
-        
-        if (speakLang && !bigText.includes('未收錄')) {
-            let utterance = new SpeechSynthesisUtterance(bigText);
-            utterance.lang = speakLang;
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
-    }
-    
-    function getForeignLangCode() {
-        if (currentMode === 'japanese') return 'ja-JP';
-        if (currentMode === 'korean') return 'ko-KR';
-        return 'en-US';
-    }
-    
-    function setMode(mode) {
-        if(currentMode===mode) return;
-        currentMode=mode;
-        modeBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === mode));
-        rebuildActiveMaps();
-        renderTranslationView("✨ 模式已切換，請重新篩選詞庫...", "", null);
-    }
-    
-    // ----------------------------- 語音辨識連動優化 -----------------------------
-    function initSpeechRecognition() {
-        if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
-            voiceStatusSpan.innerText='⚠️ 瀏覽器不支援語音功能';
-            return;
-        }
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        
-        recognition.onstart = () => {
-            isRecognizing = true;
-            voiceStatusSpan.innerText = recognitionTarget === 'zh' ? '🎙️ 請說中文關鍵字...' : '🎙️ 請說外文關鍵字...';
-        };
-        
-        recognition.onend = () => {
-            isRecognizing = false;
-            voiceStatusSpan.innerText = '';
-        };
-        
-        recognition.onerror = () => {
-            voiceStatusSpan.innerText = '❌ 沒聽清楚，請再試一次';
-            isRecognizing = false;
-        };
-        
-        recognition.onresult = (event) => {
-            let transcript = event.results[0][0].transcript;
-            if(!transcript) return;
-            let cleaned = cleanText(transcript);
-            
-            // 核心改進：語音識別到的文字，直接塞入搜尋框，並強制呼叫清單過濾，供用戶「手動點選挑選」
-            phraseSearchInput.value = cleaned;
-            filterAndRenderList(cleaned);
-            
-            // 提示使用者去清單挑選
-            outputDiv.innerHTML = `<div style="font-size: 0.9rem; color: #b45309; font-weight: 600;">🎙️ 語音辨識到："${cleaned}"<br>請從上方展開的清單中，挑選您要的那句對話。</div>`;
-        };
-    }
-    
-    function startVoiceInput(target) {
-        if (!recognition) return;
-        if (isRecognizing) recognition.stop();
-        
-        recognitionTarget = target;
-        recognition.lang = target === 'zh' ? 'zh-TW' : getForeignLangCode();
-        
-        try { recognition.start(); } catch(e){}
-    }
-    
-    function stopVoiceInput() {
-        if (recognition && isRecognizing) recognition.stop();
-    }
-    
-    // ----------------------------- 事件綁定 -----------------------------
-    document.addEventListener('DOMContentLoaded', async ()=>{
-        await loadAllDictionaries();
-        
-        // 搜尋框打字監聽
-        phraseSearchInput.addEventListener('input', (e) => {
-            filterAndRenderList(e.target.value);
-        });
 
-        // 點擊空白處自動關閉選單
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.input-group')) {
-                phraseListContainer.style.display = 'none';
+        function getFallbackDict(langType) {
+            if (langType === 'en') return {
+                "你好":"Hello",
+                "謝謝":"Thank you",
+                "多少錢":"How much",
+                "對不起":"Sorry",
+                "沒問題":"No problem",
+                "請問廁所在哪裡":"Where is the restroom?",
+                "我要入住":"I want to check in.",
+                "我要退房":"I want to check out."
+            };
+            if (langType === 'ja') return {
+                "你好":"こんにちは",
+                "謝謝":"ありがとう",
+                "多少錢":"いくらですか",
+                "對不起":"すみません",
+                "沒問題":"問題ないです",
+                "請問廁所在哪裡":"トイレはどこですか",
+                "我要入住":"チェックインしたいです",
+                "我要退房":"チェックアウトしたいです"
+            };
+            return {
+                "你好":"안녕하세요",
+                "謝謝":"감사합니다",
+                "多少錢":"얼마예요",
+                "對不起":"죄송합니다",
+                "沒問題":"문제 없어요",
+                "請問廁所在哪裡":"화장실이 어디예요",
+                "我要入住":"체크인하고 싶어요",
+                "我要退房":"체크아웃하고 싶어요"
+            };
+        }
+
+        async function loadJSON(url, fallbackObj) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`load fail: ${url}`);
+                return await res.json();
+            } catch (err) {
+                console.warn(`載入 ${url} 失敗，改用 fallback`, err);
+                return fallbackObj;
             }
-        });
-        
-        clearBtn.addEventListener('click', () => {
+        }
+
+        function saveCurrentCustom() {
+            localStorage.setItem(`customDict_${currentMode}`, JSON.stringify(customDict[currentMode]));
+        }
+
+        function loadCustomFromStorage() {
+            ['general', 'japanese', 'korean'].forEach(mode => {
+                const stored = localStorage.getItem(`customDict_${mode}`);
+                if (stored) {
+                    try {
+                        customDict[mode] = JSON.parse(stored);
+                    } catch (e) {
+                        customDict[mode] = { forward: {}, backward: {} };
+                    }
+                } else {
+                    customDict[mode] = { forward: {}, backward: {} };
+                }
+            });
+        }
+
+        // ----------------------------- 分類邏輯 -----------------------------
+        function getModeSourceMap(mode) {
+            if (mode === 'general') return dictGeneral.dual || {};
+            if (mode === 'japanese') return dictJapanese.dual || {};
+            return dictKorean.dual || {};
+        }
+
+        function categorizePhrase(zh, foreign, mode) {
+            const text = `${zh} ${foreign}`.toLowerCase();
+
+            // 交通 / 機場 / 移動
+            if (
+                /車站|捷運|地鐵|公車|巴士|高鐵|火車|月台|計程車|出租車|搭車|機場|航班|班機|登機|行李|護照|海關|轉機|出境|入境/.test(zh) ||
+                /station|train|bus|taxi|airport|flight|boarding|luggage|passport|gate/.test(text)
+            ) return '交通';
+
+            // 飯店住宿
+            if (
+                /飯店|酒店|旅館|民宿|入住|退房|房間|雙人房|單人房|房卡|櫃台|毛巾|吹風機|熱水|空調|冷氣|加床|早餐/.test(zh) ||
+                /hotel|check in|check out|room|towel|hair dryer|breakfast|front desk/.test(text)
+            ) return '飯店住宿';
+
+            // 餐廳點餐
+            if (
+                /菜單|點餐|外帶|內用|咖啡|茶|飲料|白開水|啤酒|牛奶|好吃|辣|不辣|少冰|少糖|結帳|買單|餐廳|筷子|湯匙|叉子/.test(zh) ||
+                /menu|takeout|dine in|coffee|tea|drink|water|spicy|restaurant|bill|check/.test(text)
+            ) return '餐廳點餐';
+
+            // 購物
+            if (
+                /多少錢|價錢|價格|便宜|刷卡|現金|發票|收據|折扣|退稅|尺寸|顏色|試穿|這個|那個|我要買/.test(zh) ||
+                /price|cash|card|receipt|discount|tax free|size|color|buy/.test(text)
+            ) return '購物';
+
+            // 醫療緊急
+            if (
+                /醫院|診所|藥局|藥房|發燒|頭痛|肚子痛|過敏|受傷|流血|救護車|警察|不舒服|暈|急診/.test(zh) ||
+                /hospital|clinic|pharmacy|fever|headache|allergy|ambulance|police|emergency/.test(text)
+            ) return '醫療緊急';
+
+            // 常用對話
+            if (
+                /你好|謝謝|對不起|不好意思|請問|再見|可以嗎|沒關係|沒問題|幫我|我想|我要|哪裡|怎麼走/.test(zh) ||
+                /hello|thank you|sorry|excuse me|please|goodbye|can i|where|how/.test(text)
+            ) return '常用對話';
+
+            return '其他';
+        }
+
+        function buildCategoryDataForMode(mode) {
+            const sourceMap = getModeSourceMap(mode);
+            const result = {
+                [CATEGORY_ALL]: []
+            };
+
+            // 原始字典
+            for (const [zh, foreign] of Object.entries(sourceMap)) {
+                const cat = categorizePhrase(zh, foreign, mode);
+                if (!result[cat]) result[cat] = [];
+                result[cat].push({ zh, foreign });
+                result[CATEGORY_ALL].push({ zh, foreign });
+            }
+
+            // 自訂字典
+            const customForward = customDict[mode]?.forward || {};
+            for (const [zh, foreign] of Object.entries(customForward)) {
+                const cat = categorizePhrase(zh, foreign, mode);
+                if (!result[cat]) result[cat] = [];
+                result[cat].push({ zh, foreign });
+                result[CATEGORY_ALL].push({ zh, foreign });
+            }
+
+            // 去重 + 中文排序
+            for (const cat of Object.keys(result)) {
+                const seen = new Set();
+                result[cat] = result[cat]
+                    .filter(item => {
+                        const key = `${item.zh}|||${item.foreign}`;
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                    })
+                    .sort((a, b) => a.zh.localeCompare(b.zh, 'zh-Hant'));
+            }
+
+            categorizedPhraseMap[mode] = result;
+        }
+
+        function buildAllCategoryData() {
+            buildCategoryDataForMode('general');
+            buildCategoryDataForMode('japanese');
+            buildCategoryDataForMode('korean');
+        }
+
+        function populateCategorySelect() {
+            const currentCategories = categorizedPhraseMap[currentMode] || {};
+            const categoryOrder = [
+                CATEGORY_ALL,
+                '常用對話',
+                '交通',
+                '飯店住宿',
+                '餐廳點餐',
+                '購物',
+                '醫療緊急',
+                '其他'
+            ];
+
+            const oldValue = categorySelect.value || CATEGORY_ALL;
+            categorySelect.innerHTML = '';
+
+            categoryOrder.forEach(cat => {
+                if (currentCategories[cat]) {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    categorySelect.appendChild(option);
+                }
+            });
+
+            if (currentCategories[oldValue]) {
+                categorySelect.value = oldValue;
+            } else {
+                categorySelect.value = CATEGORY_ALL;
+            }
+        }
+
+        function getCurrentCategoryItems() {
+            const modeCategories = categorizedPhraseMap[currentMode] || {};
+            const selectedCategory = categorySelect.value || CATEGORY_ALL;
+            return modeCategories[selectedCategory] || [];
+        }
+
+        // ----------------------------- 重建目前詞庫 -----------------------------
+        function rebuildActiveMaps() {
+            let baseForward = {};
+            let baseBackward = {};
+
+            if (currentMode === 'general') {
+                baseForward = { ...dictGeneral.dual };
+                for (let [k, v] of Object.entries(baseForward)) baseBackward[v] = k;
+            } else if (currentMode === 'japanese') {
+                baseForward = { ...dictJapanese.dual };
+                for (let [k, v] of Object.entries(baseForward)) baseBackward[v] = k;
+            } else {
+                baseForward = { ...dictKorean.dual };
+                for (let [k, v] of Object.entries(baseForward)) baseBackward[v] = k;
+            }
+
+            const cf = customDict[currentMode].forward || {};
+            const cb = customDict[currentMode].backward || {};
+
+            activeForwardMap = { ...baseForward, ...cf };
+            activeBackwardMap = { ...baseBackward, ...cb };
+
+            for (let [src, tgt] of Object.entries(cf)) {
+                if (!activeBackwardMap[tgt]) activeBackwardMap[tgt] = src;
+            }
+            for (let [tgt, src] of Object.entries(cb)) {
+                if (!activeForwardMap[src]) activeForwardMap[src] = tgt;
+            }
+
+            const langLabel = currentMode === 'general'
+                ? '英文'
+                : (currentMode === 'japanese' ? '日文' : '韓文');
+
+            voiceForeignBtn.textContent = `🎤 說${langLabel}篩選`;
+            langHintSpan.innerText = `模式: 中${langLabel}雙向對話`;
+
+            buildAllCategoryData();
+            populateCategorySelect();
+
             phraseSearchInput.value = '';
             phraseListContainer.style.display = 'none';
-            currentZhText = ""; currentForeignText = "";
-            renderTranslationView("✨ 已重設，請輸入文字或使用語音重新篩選...", "", null);
-        });
-        
-        voiceZhBtn.addEventListener('click', () => startVoiceInput('zh'));
-        voiceForeignBtn.addEventListener('click', () => startVoiceInput('foreign'));
-        voiceStopBtn.addEventListener('click', stopVoiceInput);
-        
-        // 手動重播
-        speakZhBtn.addEventListener('click', () => {
-            if (!currentZhText || currentZhText.includes('[未收錄]')) return;
-            let utterance = new SpeechSynthesisUtterance(currentZhText);
-            utterance.lang = 'zh-TW';
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
-        });
-        
-        speakForeignBtn.addEventListener('click', () => {
-            if (!currentForeignText || currentForeignText.includes('[未收錄]')) return;
-            let utterance = new SpeechSynthesisUtterance(currentForeignText);
-            utterance.lang = getForeignLangCode();
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
-        });
-        
-        // 新增日常對話
-        addWordBtn.addEventListener('click', () => {
-            const src = document.getElementById('newWord').value.trim();
-            const tgt = document.getElementById('newTrans').value.trim();
-            if(!src || !tgt){ alert("請完整填寫中文與外文"); return; }
-            
-            customDict[currentMode].forward[src] = tgt;
-            customDict[currentMode].backward[tgt] = src;
-            saveCurrentCustom();
+        }
+
+        // ----------------------------- 篩選與顯示句子 -----------------------------
+        function filterAndRenderList(keyword = '') {
+            phraseListContainer.innerHTML = '';
+
+            const cleanKey = keyword.toLowerCase().trim();
+            const currentItems = getCurrentCategoryItems();
+
+            let filteredItems = currentItems;
+
+            if (cleanKey) {
+                filteredItems = currentItems.filter(item => {
+                    const zh = item.zh.toLowerCase();
+                    const foreign = item.foreign.toLowerCase();
+                    return zh.includes(cleanKey) || foreign.includes(cleanKey);
+                });
+            }
+
+            if (!filteredItems.length) {
+                phraseListContainer.style.display = 'block';
+                phraseListContainer.innerHTML = `
+                    <div class="phrase-item" style="color:#94a3b8; cursor:default;">
+                        ❌ 此分類 / 關鍵字下沒有符合句子...
+                    </div>
+                `;
+                return;
+            }
+
+            filteredItems.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'phrase-item';
+                row.innerHTML = `
+                    <span>${escapeHtml(item.zh)}</span>
+                    <span style="color:#64748b; font-size:0.72rem;">${escapeHtml(item.foreign)}</span>
+                `;
+
+                row.addEventListener('click', () => {
+                    phraseSearchInput.value = item.zh;
+                    currentZhText = item.zh;
+                    currentForeignText = item.foreign;
+                    phraseListContainer.style.display = 'none';
+
+                    renderTranslationView(
+                        currentForeignText,
+                        `中文對照: ${currentZhText}`,
+                        getForeignLangCode()
+                    );
+                });
+
+                phraseListContainer.appendChild(row);
+            });
+
+            phraseListContainer.style.display = 'block';
+        }
+
+        // ----------------------------- 顯示翻譯 / 自動播放 -----------------------------
+        function renderTranslationView(bigText, smallText, speakLang) {
+            outputDiv.innerHTML = `
+                <div style="font-size:1.18rem; font-weight:800; color:#1e3a5f; margin-bottom:6px;">
+                    ${escapeHtml(bigText)}
+                </div>
+                <div style="font-size:0.9rem; color:#64748b; font-weight:600;">
+                    ${escapeHtml(smallText)}
+                </div>
+            `;
+
+            if (speakLang && bigText && !bigText.includes('未收錄')) {
+                const utterance = new SpeechSynthesisUtterance(bigText);
+                utterance.lang = speakLang;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function getForeignLangCode() {
+            if (currentMode === 'japanese') return 'ja-JP';
+            if (currentMode === 'korean') return 'ko-KR';
+            return 'en-US';
+        }
+
+        function setMode(mode) {
+            if (currentMode === mode) return;
+
+            currentMode = mode;
+            modeBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+            });
+
             rebuildActiveMaps();
-            
-            currentZhText = src; currentForeignText = tgt;
-            phraseSearchInput.value = src;
-            renderTranslationView(tgt, `中文對照: ${src}`, getForeignLangCode());
-            
-            document.getElementById('newWord').value = '';
-            document.getElementById('newTrans').value = '';
-            alert(`✅ 已成功加進對話庫！`);
-        });
-        
-        resetCustomBtn.addEventListener('click', () => {
-            if(confirm(`確定清除當前模式的所有自訂對話？`)){
-                customDict[currentMode] = { forward:{}, backward:{} };
+            renderTranslationView("✨ 模式已切換，請選分類或輸入關鍵字篩選...", "", null);
+
+            // 切模式後直接顯示該模式目前分類內容
+            filterAndRenderList('');
+        }
+
+        // ----------------------------- 載入字典 -----------------------------
+        async function loadAllDictionaries() {
+            dictGeneral.dual = await loadJSON('data/zh_en_dual.json', getFallbackDict('en'));
+            dictJapanese.dual = await loadJSON('data/zh_ja_dual.json', getFallbackDict('ja'));
+            dictKorean.dual = await loadJSON('data/zh_ko_dual.json', getFallbackDict('ko'));
+
+            loadCustomFromStorage();
+            rebuildActiveMaps();
+
+            renderTranslationView("✨ 請先選分類，或輸入文字 / 使用語音篩選詞庫...", "", null);
+
+            // 預設直接顯示全部分類
+            filterAndRenderList('');
+        }
+
+        // ----------------------------- 語音辨識 -----------------------------
+        function initSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                voiceStatusSpan.innerText = '⚠️ 瀏覽器不支援語音功能';
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                isRecognizing = true;
+                voiceStatusSpan.innerText =
+                    recognitionTarget === 'zh'
+                        ? '🎙️ 請說中文關鍵字...'
+                        : '🎙️ 請說外文關鍵字...';
+            };
+
+            recognition.onend = () => {
+                isRecognizing = false;
+                voiceStatusSpan.innerText = '';
+            };
+
+            recognition.onerror = () => {
+                voiceStatusSpan.innerText = '❌ 沒聽清楚，請再試一次';
+                isRecognizing = false;
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results?.[0]?.[0]?.transcript || '';
+                if (!transcript) return;
+
+                const cleaned = cleanText(transcript);
+                phraseSearchInput.value = cleaned;
+                filterAndRenderList(cleaned);
+
+                outputDiv.innerHTML = `
+                    <div style="font-size:0.95rem; color:#b45309; font-weight:700;">
+                        🎙️ 語音辨識到：「${escapeHtml(cleaned)}」<br>
+                        請從上方清單挑選您要的句子。
+                    </div>
+                `;
+            };
+        }
+
+        function startVoiceInput(target) {
+            if (!recognition) return;
+            if (isRecognizing) recognition.stop();
+
+            recognitionTarget = target;
+            recognition.lang = target === 'zh' ? 'zh-TW' : getForeignLangCode();
+
+            try {
+                recognition.start();
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function stopVoiceInput() {
+            if (recognition && isRecognizing) recognition.stop();
+        }
+
+        // ----------------------------- 事件綁定 -----------------------------
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadAllDictionaries();
+
+            // 分類切換：刷新當前分類內容
+            categorySelect.addEventListener('change', () => {
+                phraseSearchInput.value = '';
+                filterAndRenderList('');
+            });
+
+            // 搜尋：只在目前分類內搜尋
+            phraseSearchInput.addEventListener('input', (e) => {
+                filterAndRenderList(e.target.value);
+            });
+
+            // 點到搜尋框就展開當前分類內容
+            phraseSearchInput.addEventListener('focus', () => {
+                filterAndRenderList(phraseSearchInput.value);
+            });
+
+            // 點外面關閉句子清單
+            document.addEventListener('click', (e) => {
+                const insideSearchArea =
+                    e.target.closest('.search-input-wrapper') ||
+                    e.target.closest('#phraseList') ||
+                    e.target.closest('#categorySelect');
+
+                if (!insideSearchArea) {
+                    phraseListContainer.style.display = 'none';
+                }
+            });
+
+            clearBtn.addEventListener('click', () => {
+                phraseSearchInput.value = '';
+                currentZhText = "";
+                currentForeignText = "";
+                categorySelect.value = CATEGORY_ALL;
+                filterAndRenderList('');
+                renderTranslationView("✨ 已重設，請重新選分類或輸入關鍵字...", "", null);
+            });
+
+            voiceZhBtn.addEventListener('click', () => startVoiceInput('zh'));
+            voiceForeignBtn.addEventListener('click', () => startVoiceInput('foreign'));
+            voiceStopBtn.addEventListener('click', stopVoiceInput);
+
+            speakZhBtn.addEventListener('click', () => {
+                if (!currentZhText || currentZhText.includes('[未收錄]')) return;
+                const utterance = new SpeechSynthesisUtterance(currentZhText);
+                utterance.lang = 'zh-TW';
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            });
+
+            speakForeignBtn.addEventListener('click', () => {
+                if (!currentForeignText || currentForeignText.includes('[未收錄]')) return;
+                const utterance = new SpeechSynthesisUtterance(currentForeignText);
+                utterance.lang = getForeignLangCode();
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            });
+
+            addWordBtn.addEventListener('click', () => {
+                const src = document.getElementById('newWord').value.trim();
+                const tgt = document.getElementById('newTrans').value.trim();
+
+                if (!src || !tgt) {
+                    alert("請完整填寫中文與外文");
+                    return;
+                }
+
+                customDict[currentMode].forward[src] = tgt;
+                customDict[currentMode].backward[tgt] = src;
                 saveCurrentCustom();
                 rebuildActiveMaps();
-                renderTranslationView("✨ 已清空自訂對話", "", null);
-            }
+
+                currentZhText = src;
+                currentForeignText = tgt;
+                phraseSearchInput.value = src;
+
+                categorySelect.value = CATEGORY_ALL;
+                filterAndRenderList(src);
+
+                renderTranslationView(tgt, `中文對照: ${src}`, getForeignLangCode());
+
+                document.getElementById('newWord').value = '';
+                document.getElementById('newTrans').value = '';
+                alert('✅ 已成功加進對話庫！');
+            });
+
+            resetCustomBtn.addEventListener('click', () => {
+                if (confirm(`確定清除當前模式的所有自訂對話？`)) {
+                    customDict[currentMode] = { forward: {}, backward: {} };
+                    saveCurrentCustom();
+                    rebuildActiveMaps();
+                    categorySelect.value = CATEGORY_ALL;
+                    filterAndRenderList('');
+                    renderTranslationView("✨ 已清空自訂對話", "", null);
+                }
+            });
+
+            modeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setMode(btn.getAttribute('data-mode'));
+                });
+            });
+
+            initSpeechRecognition();
         });
-        
-        modeBtns.forEach(btn => {
-            btn.addEventListener('click', () => setMode(btn.getAttribute('data-mode')));
-        });
-        
-        initSpeechRecognition();
-    });
-</script>
+    </script>
 </body>
 </html>
