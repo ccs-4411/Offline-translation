@@ -136,7 +136,7 @@
         .phrase-list {
             display: none;
             margin-top: 8px;
-            max-height: 320px;
+            max-height: 360px;
             overflow-y: auto;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
@@ -277,7 +277,8 @@
             <h1>🧳 離線翻譯 / 旅遊對話助手</h1>
             <div class="subtext">
                 支援 <strong>中英 / 中日 / 中韓</strong> 對話句庫搜尋、分類篩選、語音搜尋、點句自動播放外語，
-                也可以自行新增常用對話到本機自訂詞庫。
+                也可以自行新增常用對話到本機自訂詞庫。<br>
+                <strong>新版：</strong> 可直接按「聽外國人回話」，把對方講的外文抓成關鍵詞，從句庫反查最接近的中文句子。
             </div>
 
             <div class="mode-bar">
@@ -289,8 +290,8 @@
 
         <div class="card">
             <label>
-                🔍 搜尋或用語音篩選字庫
-                <span class="badge" id="langHint">模式: 中英雙向對話</span>
+                🔍 搜尋 / 外國人回話辨識
+                <span class="badge" id="langHint">模式: 中英文雙向對話</span>
             </label>
 
             <div class="category-row">
@@ -312,13 +313,13 @@
 
             <div class="voice-row">
                 <button id="voiceZhBtn" class="btn-blue">🎤 說中文篩選</button>
-                <button id="voiceForeignBtn" class="btn-green">🎤 說英文篩選</button>
+                <button id="voiceForeignBtn" class="btn-green">🎤 聽外國人回話</button>
                 <button id="voiceStopBtn" class="btn-red">⏹ 停止語音</button>
                 <span id="voiceStatus" class="voice-status"></span>
             </div>
 
             <div id="outputText" class="result-box">
-                ✨ 請先選分類，或輸入文字 / 使用語音篩選詞庫...
+                ✨ 請先選分類、輸入關鍵字，或直接按「聽外國人回話」...
             </div>
 
             <div class="action-row">
@@ -347,6 +348,7 @@
         </div>
     </div>
 
+    <!-- 只保留這一個 JS，不要再把整段 JS 寫在 index 裡 -->
     <script src="app.js"></script>
 </body>
 </html>
