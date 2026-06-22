@@ -1,14 +1,12 @@
 // app.js
 // =========================================================
 // 離線翻譯 / 旅遊對話助手
-// 升級版：加入「外國人回話關鍵詞搜尋模式」
 // 功能：
 // 1. 中英 / 中日 / 中韓模式切換
 // 2. 分類下拉選單
 // 3. 搜尋 / 語音搜尋句庫
 // 4. 點句子自動播放外語
 // 5. 自訂詞彙新增 / 清空
-// 6. 外國人回話：語音 -> 關鍵詞抽取 -> 全句庫搜尋排序
 // =========================================================
 
 // ----------------------------- 字典與全域變數 -----------------------------
@@ -59,7 +57,7 @@ const langHintSpan = document.getElementById('langHint');
 function cleanText(text) {
     return text
         .trim()
-        .replace(/[。，！？；："'`“”‘’（）【】《》…—・、,\.!\?;:\(\)\[\]\{\}<>]/g, ' ')
+        .replace(/[。，！？；：""''（）【】《》…—・、,\.!\?;:\(\)\[\]\{\}<>]/g, '')
         .replace(/\s+/g, ' ')
         .trim();
 }
@@ -85,12 +83,7 @@ function getFallbackDict(langType) {
             "我要入住": "I want to check in.",
             "我要退房": "I want to check out.",
             "請給我菜單": "Please give me the menu.",
-            "請幫我叫計程車": "Please call a taxi for me.",
-            "請出示護照": "Please show me your passport.",
-            "我有訂房": "I have a reservation.",
-            "內用還是外帶": "For here or to go?",
-            "我要內用": "For here, please.",
-            "我要外帶": "To go, please."
+            "請幫我叫計程車": "Please call a taxi for me."
         };
     }
 
@@ -105,9 +98,7 @@ function getFallbackDict(langType) {
             "我要入住": "チェックインしたいです",
             "我要退房": "チェックアウトしたいです",
             "請給我菜單": "メニューをください",
-            "請幫我叫計程車": "タクシーを呼んでください",
-            "請出示護照": "パスポートを見せてください",
-            "我有訂房": "予約があります"
+            "請幫我叫計程車": "タクシーを呼んでください"
         };
     }
 
@@ -121,9 +112,7 @@ function getFallbackDict(langType) {
         "我要入住": "체크인하고 싶어요",
         "我要退房": "체크아웃하고 싶어요",
         "請給我菜單": "메뉴 좀 주세요",
-        "請幫我叫計程車": "택시 좀 불러 주세요",
-        "請出示護照": "여권을 보여 주세요",
-        "我有訂房": "예약이 있어요"
+        "請幫我叫計程車": "택시 좀 불러 주세요"
     };
 }
 
@@ -167,31 +156,37 @@ function getModeSourceMap(mode) {
 function categorizePhrase(zh, foreign) {
     const text = `${zh} ${foreign}`.toLowerCase();
 
+    // 交通
     if (
         /車站|捷運|地鐵|公車|巴士|高鐵|火車|月台|計程車|出租車|搭車|機場|航班|班機|登機|行李|護照|海關|轉機|出境|入境/.test(zh) ||
         /station|train|bus|taxi|airport|flight|boarding|luggage|passport|gate/.test(text)
     ) return '交通';
 
+    // 飯店住宿
     if (
-        /飯店|酒店|旅館|民宿|入住|退房|房間|雙人房|單人房|房卡|櫃台|毛巾|吹風機|熱水|空調|冷氣|加床|早餐|訂房/.test(zh) ||
-        /hotel|check in|check out|room|towel|hair dryer|breakfast|front desk|reservation|booking/.test(text)
+        /飯店|酒店|旅館|民宿|入住|退房|房間|雙人房|單人房|房卡|櫃台|毛巾|吹風機|熱水|空調|冷氣|加床|早餐/.test(zh) ||
+        /hotel|check in|check out|room|towel|hair dryer|breakfast|front desk/.test(text)
     ) return '飯店住宿';
 
+    // 餐廳點餐
     if (
         /菜單|點餐|外帶|內用|咖啡|茶|飲料|白開水|啤酒|牛奶|好吃|辣|不辣|少冰|少糖|結帳|買單|餐廳|筷子|湯匙|叉子/.test(zh) ||
         /menu|takeout|dine in|coffee|tea|drink|water|spicy|restaurant|bill|check/.test(text)
     ) return '餐廳點餐';
 
+    // 購物
     if (
         /多少錢|價錢|價格|便宜|刷卡|現金|發票|收據|折扣|退稅|尺寸|顏色|試穿|這個|那個|我要買/.test(zh) ||
         /price|cash|card|receipt|discount|tax free|size|color|buy/.test(text)
     ) return '購物';
 
+    // 醫療緊急
     if (
         /醫院|診所|藥局|藥房|發燒|頭痛|肚子痛|過敏|受傷|流血|救護車|警察|不舒服|暈|急診/.test(zh) ||
         /hospital|clinic|pharmacy|fever|headache|allergy|ambulance|police|emergency/.test(text)
     ) return '醫療緊急';
 
+    // 常用對話
     if (
         /你好|謝謝|對不起|不好意思|請問|再見|可以嗎|沒關係|沒問題|幫我|我想|我要|哪裡|怎麼走/.test(zh) ||
         /hello|thank you|sorry|excuse me|please|goodbye|can i|where|how/.test(text)
@@ -206,6 +201,7 @@ function buildCategoryDataForMode(mode) {
         [CATEGORY_ALL]: []
     };
 
+    // 原始字典
     for (const [zh, foreign] of Object.entries(sourceMap)) {
         const cat = categorizePhrase(zh, foreign);
         if (!result[cat]) result[cat] = [];
@@ -213,6 +209,7 @@ function buildCategoryDataForMode(mode) {
         result[CATEGORY_ALL].push({ zh, foreign });
     }
 
+    // 自訂字典
     const customForward = customDict[mode]?.forward || {};
     for (const [zh, foreign] of Object.entries(customForward)) {
         const cat = categorizePhrase(zh, foreign);
@@ -221,6 +218,7 @@ function buildCategoryDataForMode(mode) {
         result[CATEGORY_ALL].push({ zh, foreign });
     }
 
+    // 去重 + 中文排序
     for (const cat of Object.keys(result)) {
         const seen = new Set();
         result[cat] = result[cat]
@@ -282,11 +280,6 @@ function getCurrentCategoryItems() {
     return modeCategories[selectedCategory] || [];
 }
 
-function getAllItemsForCurrentMode() {
-    const modeCategories = categorizedPhraseMap[currentMode] || {};
-    return modeCategories[CATEGORY_ALL] || [];
-}
-
 // ----------------------------- 重建目前詞庫 -----------------------------
 function rebuildActiveMaps() {
     let baseForward = {};
@@ -329,7 +322,7 @@ function rebuildActiveMaps() {
                 ? '日文'
                 : '韓文';
 
-    if (voiceForeignBtn) voiceForeignBtn.textContent = `🎤 聽${langLabel}回話`;
+    if (voiceForeignBtn) voiceForeignBtn.textContent = `🎤 說${langLabel}篩選`;
     if (langHintSpan) langHintSpan.innerText = `模式: 中${langLabel}雙向對話`;
 
     buildAllCategoryData();
@@ -353,8 +346,8 @@ function renderTranslationView(bigText, smallText, speakLang) {
         <div style="font-size:1.18rem; font-weight:800; color:#1e3a5f; margin-bottom:6px;">
             ${escapeHtml(bigText)}
         </div>
-        <div style="font-size:0.9rem; color:#64748b; font-weight:600; line-height:1.6;">
-            ${smallText}
+        <div style="font-size:0.9rem; color:#64748b; font-weight:600;">
+            ${escapeHtml(smallText)}
         </div>
     `;
 
@@ -366,7 +359,7 @@ function renderTranslationView(bigText, smallText, speakLang) {
     }
 }
 
-// ----------------------------- 一般句庫篩選 -----------------------------
+// ----------------------------- 篩選與顯示句子 -----------------------------
 function filterAndRenderList(keyword = '') {
     if (!phraseListContainer) return;
 
@@ -413,299 +406,7 @@ function filterAndRenderList(keyword = '') {
 
             renderTranslationView(
                 currentForeignText,
-                `中文對照: ${escapeHtml(currentZhText)}`,
-                getForeignLangCode()
-            );
-        });
-
-        phraseListContainer.appendChild(row);
-    });
-
-    phraseListContainer.style.display = 'block';
-}
-
-// =========================================================
-// 外國人回話關鍵詞搜尋模式
-// =========================================================
-
-// 英文停用字
-const EN_STOPWORDS = new Set([
-    "please", "can", "could", "would", "will", "shall", "may", "might",
-    "i", "me", "my", "mine", "you", "your", "yours", "we", "our", "ours",
-    "he", "she", "they", "them", "their", "theirs", "it", "its",
-    "the", "a", "an", "this", "that", "these", "those",
-    "is", "are", "am", "was", "were", "be", "been", "being",
-    "do", "does", "did", "have", "has", "had",
-    "to", "for", "of", "in", "on", "at", "with", "from", "by", "as",
-    "and", "or", "but", "if", "then", "so", "than", "very", "just",
-    "there", "here", "okay", "ok", "yes", "no", "sir", "madam", "hi", "hello"
-]);
-
-// 日文常見助詞 / 無意義字（先做簡化版）
-const JA_STOPWORDS = new Set([
-    "です", "ます", "でした", "ません", "ください", "お願い", "します",
-    "は", "が", "を", "に", "で", "と", "も", "の", "か", "ね", "よ"
-]);
-
-// 韓文常見助詞 / 結尾（先做簡化版）
-const KO_STOPWORDS = new Set([
-    "주세요", "합니다", "해요", "입니다", "있어요", "없어요",
-    "은", "는", "이", "가", "을", "를", "에", "에서", "도", "요"
-]);
-
-function normalizeForeignSentence(text) {
-    return cleanText(
-        text
-            .toLowerCase()
-            .replace(/check-in/g, 'check in')
-            .replace(/check-out/g, 'check out')
-            .replace(/take-out/g, 'take out')
-            .replace(/to-go/g, 'to go')
-            .replace(/credit card/g, 'card')
-            .replace(/room key/g, 'key')
-    );
-}
-
-function tokenizeForeignText(text, mode = currentMode) {
-    const normalized = normalizeForeignSentence(text);
-    if (!normalized) return [];
-
-    let tokens = normalized.split(/\s+/).filter(Boolean);
-
-    if (mode === 'general') {
-        tokens = tokens.filter(t => !EN_STOPWORDS.has(t) && t.length > 1);
-    } else if (mode === 'japanese') {
-        tokens = tokens.filter(t => !JA_STOPWORDS.has(t) && t.length > 0);
-    } else if (mode === 'korean') {
-        tokens = tokens.filter(t => !KO_STOPWORDS.has(t) && t.length > 0);
-    }
-
-    // 去重
-    return [...new Set(tokens)];
-}
-
-function getBoostKeywords(mode = currentMode) {
-    if (mode === 'general') {
-        return {
-            "passport": 6,
-            "reservation": 6,
-            "booking": 6,
-            "check": 4,
-            "checkin": 4,
-            "check-in": 4,
-            "checkout": 4,
-            "check-out": 4,
-            "room": 5,
-            "key": 4,
-            "bill": 5,
-            "menu": 5,
-            "order": 4,
-            "cash": 5,
-            "card": 5,
-            "price": 4,
-            "ticket": 5,
-            "train": 5,
-            "bus": 5,
-            "taxi": 5,
-            "airport": 5,
-            "luggage": 5,
-            "toilet": 4,
-            "restroom": 4,
-            "spicy": 4,
-            "allergy": 5,
-            "hospital": 6,
-            "pharmacy": 6,
-            "doctor": 6
-        };
-    }
-
-    if (mode === 'japanese') {
-        return {
-            "パスポート": 6,
-            "予約": 6,
-            "チェックイン": 5,
-            "チェックアウト": 5,
-            "部屋": 5,
-            "鍵": 4,
-            "メニュー": 5,
-            "会計": 5,
-            "現金": 5,
-            "カード": 5,
-            "駅": 5,
-            "空港": 5,
-            "タクシー": 5,
-            "病院": 6,
-            "薬局": 6
-        };
-    }
-
-    return {
-        "여권": 6,
-        "예약": 6,
-        "체크인": 5,
-        "체크아웃": 5,
-        "방": 5,
-        "열쇠": 4,
-        "메뉴": 5,
-        "계산": 5,
-        "현금": 5,
-        "카드": 5,
-        "역": 5,
-        "공항": 5,
-        "택시": 5,
-        "병원": 6,
-        "약국": 6
-    };
-}
-
-function scorePhraseByKeywords(item, keywords, mode = currentMode) {
-    const foreignNorm = normalizeForeignSentence(item.foreign || '');
-    const zhNorm = cleanText((item.zh || '').toLowerCase());
-
-    let score = 0;
-    let matched = [];
-
-    const boosts = getBoostKeywords(mode);
-
-    for (const kw of keywords) {
-        let kwScore = 0;
-
-        if (!kw) continue;
-
-        // 外文完整包含
-        if (foreignNorm.includes(kw)) {
-            kwScore += 3;
-        }
-
-        // 中文有時也可對應分類詞
-        if (zhNorm.includes(kw)) {
-            kwScore += 1;
-        }
-
-        // 特殊權重字
-        if (boosts[kw]) {
-            kwScore += boosts[kw];
-        }
-
-        // 額外：英文字根簡易處理
-        if (mode === 'general' && kw.length >= 4) {
-            const root = kw.replace(/(ing|ed|s)$/i, '');
-            if (root && root !== kw && foreignNorm.includes(root)) {
-                kwScore += 2;
-            }
-        }
-
-        if (kwScore > 0) {
-            matched.push(kw);
-            score += kwScore;
-        }
-    }
-
-    // 如果關鍵詞很多，且有多個命中，再加分
-    if (matched.length >= 2) score += matched.length * 1.5;
-    if (matched.length >= 3) score += 2;
-
-    return {
-        score,
-        matched
-    };
-}
-
-function searchForeignReplyByKeywords(rawSentence) {
-    const keywords = tokenizeForeignText(rawSentence, currentMode);
-    const allItems = getAllItemsForCurrentMode();
-
-    if (!keywords.length) {
-        return {
-            keywords: [],
-            results: []
-        };
-    }
-
-    const scored = allItems.map(item => {
-        const { score, matched } = scorePhraseByKeywords(item, keywords, currentMode);
-        return { ...item, score, matched };
-    });
-
-    const results = scored
-        .filter(item => item.score > 0)
-        .sort((a, b) => {
-            if (b.score !== a.score) return b.score - a.score;
-            return a.zh.localeCompare(b.zh, 'zh-Hant');
-        })
-        .slice(0, 12);
-
-    return {
-        keywords,
-        results
-    };
-}
-
-function renderForeignReplySearchResult(rawSentence, keywords, results) {
-    if (!phraseListContainer || !outputDiv) return;
-
-    // 上方結果區
-    const keywordHtml = keywords.length
-        ? keywords.map(k => `<span style="display:inline-block;background:#eef6ff;color:#2563eb;padding:3px 8px;border-radius:999px;margin:2px;font-size:0.82rem;">${escapeHtml(k)}</span>`).join('')
-        : '<span style="color:#94a3b8;">(無法抽出有效關鍵詞)</span>';
-
-    outputDiv.innerHTML = `
-        <div style="font-size:1rem; font-weight:800; color:#1e3a5f; margin-bottom:8px;">
-            🎧 外國人回話辨識結果
-        </div>
-        <div style="font-size:0.9rem; color:#334155; line-height:1.7; margin-bottom:10px;">
-            <div><b>原句：</b>${escapeHtml(rawSentence)}</div>
-            <div style="margin-top:6px;"><b>抽出的關鍵詞：</b><br>${keywordHtml}</div>
-            <div style="margin-top:8px; color:#64748b;">
-                已從 <b>目前語言模式的全部句庫</b> 幫你找最接近的句子，請從下方挑選。
-            </div>
-        </div>
-    `;
-
-    // 下方候選句清單
-    phraseListContainer.innerHTML = '';
-
-    if (!results.length) {
-        phraseListContainer.style.display = 'block';
-        phraseListContainer.innerHTML = `
-            <div class="phrase-item" style="color:#94a3b8; cursor:default; line-height:1.7;">
-                ❌ 找不到接近的句子。<br>
-                建議：
-                <br>1. 再講一次，讓辨識更完整
-                <br>2. 先切到更接近的語言模式 / 類別
-                <br>3. 後面可再補更多常用旅遊句到 JSON
-            </div>
-        `;
-        return;
-    }
-
-    results.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'phrase-item';
-
-        const matchedText = item.matched?.length
-            ? `命中：${item.matched.join(', ')}`
-            : '';
-
-        row.innerHTML = `
-            <div style="display:flex; flex-direction:column; gap:3px; width:100%;">
-                <span style="font-weight:700;">${escapeHtml(item.zh)}</span>
-                <span style="color:#64748b; font-size:0.76rem;">${escapeHtml(item.foreign)}</span>
-                <span style="color:#94a3b8; font-size:0.7rem;">${escapeHtml(matchedText)}</span>
-            </div>
-        `;
-
-        row.addEventListener('click', () => {
-            if (phraseSearchInput) phraseSearchInput.value = item.zh;
-
-            currentZhText = item.zh;
-            currentForeignText = item.foreign;
-
-            phraseListContainer.style.display = 'none';
-
-            renderTranslationView(
-                currentForeignText,
-                `中文對照: ${escapeHtml(currentZhText)}`,
+                `中文對照: ${currentZhText}`,
                 getForeignLangCode()
             );
         });
@@ -727,7 +428,7 @@ function setMode(mode) {
     });
 
     rebuildActiveMaps();
-    renderTranslationView("✨ 模式已切換，請選分類、輸入關鍵字，或直接聽外國人回話...", "", null);
+    renderTranslationView("✨ 模式已切換，請選分類或輸入關鍵字篩選...", "", null);
     filterAndRenderList('');
 }
 
@@ -740,8 +441,9 @@ async function loadAllDictionaries() {
     loadCustomFromStorage();
     rebuildActiveMaps();
 
-    renderTranslationView("✨ 請先選分類，或輸入文字 / 使用語音搜尋。也可以直接按『聽外文回話』讓系統抓關鍵詞找句子。", "", null);
+    renderTranslationView("✨ 請先選分類，或輸入文字 / 使用語音篩選詞庫...", "", null);
 
+    // 預設直接顯示全部分類
     filterAndRenderList('');
 }
 
@@ -762,11 +464,10 @@ function initSpeechRecognition() {
     recognition.onstart = () => {
         isRecognizing = true;
         if (voiceStatusSpan) {
-            if (recognitionTarget === 'zh') {
-                voiceStatusSpan.innerText = '🎙️ 請說中文關鍵字...';
-            } else {
-                voiceStatusSpan.innerText = '🎙️ 請讓外國人說話...';
-            }
+            voiceStatusSpan.innerText =
+                recognitionTarget === 'zh'
+                    ? '🎙️ 請說中文關鍵字...'
+                    : '🎙️ 請說外文關鍵字...';
         }
     };
 
@@ -790,33 +491,19 @@ function initSpeechRecognition() {
 
         const cleaned = cleanText(transcript);
 
-        if (recognitionTarget === 'zh') {
-            // 中文語音：維持原本搜尋分類句庫
-            if (phraseSearchInput) {
-                phraseSearchInput.value = cleaned;
-            }
+        if (phraseSearchInput) {
+            phraseSearchInput.value = cleaned;
+        }
 
-            filterAndRenderList(cleaned);
+        filterAndRenderList(cleaned);
 
-            if (outputDiv) {
-                outputDiv.innerHTML = `
-                    <div style="font-size:0.95rem; color:#b45309; font-weight:700; line-height:1.7;">
-                        🎙️ 語音辨識到中文關鍵字：<br>
-                        「${escapeHtml(cleaned)}」<br>
-                        請從下方清單挑選您要的句子。
-                    </div>
-                `;
-            }
-        } else {
-            // 外文語音：改成外國人回話關鍵詞搜尋模式
-            const { keywords, results } = searchForeignReplyByKeywords(cleaned);
-
-            // 搜尋框也順便顯示原句，方便你手動再修
-            if (phraseSearchInput) {
-                phraseSearchInput.value = cleaned;
-            }
-
-            renderForeignReplySearchResult(cleaned, keywords, results);
+        if (outputDiv) {
+            outputDiv.innerHTML = `
+                <div style="font-size:0.95rem; color:#b45309; font-weight:700;">
+                    🎙️ 語音辨識到：「${escapeHtml(cleaned)}」<br>
+                    請從上方清單挑選您要的句子。
+                </div>
+            `;
         }
     };
 }
@@ -829,12 +516,7 @@ function startVoiceInput(target) {
     }
 
     recognitionTarget = target;
-
-    if (target === 'zh') {
-        recognition.lang = 'zh-TW';
-    } else {
-        recognition.lang = getForeignLangCode();
-    }
+    recognition.lang = target === 'zh' ? 'zh-TW' : getForeignLangCode();
 
     try {
         recognition.start();
@@ -874,7 +556,7 @@ function addCustomWord() {
     if (categorySelect) categorySelect.value = CATEGORY_ALL;
 
     filterAndRenderList(src);
-    renderTranslationView(tgt, `中文對照: ${escapeHtml(src)}`, getForeignLangCode());
+    renderTranslationView(tgt, `中文對照: ${src}`, getForeignLangCode());
 
     if (newWordInput) newWordInput.value = '';
     if (newTransInput) newTransInput.value = '';
@@ -919,7 +601,7 @@ function clearAll() {
     if (categorySelect) categorySelect.value = CATEGORY_ALL;
 
     filterAndRenderList('');
-    renderTranslationView("✨ 已重設，請重新選分類、輸入關鍵字，或直接聽外國人回話...", "", null);
+    renderTranslationView("✨ 已重設，請重新選分類或輸入關鍵字...", "", null);
 }
 
 // ----------------------------- 事件綁定 -----------------------------
@@ -976,3 +658,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadAllDictionaries();
     initSpeechRecognition();
 });
+
